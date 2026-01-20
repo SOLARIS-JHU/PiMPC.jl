@@ -106,6 +106,13 @@ Run the AFTI-16 aircraft closed-loop simulation:
 julia --project=. examples/AFTI16_example.jl
 ```
 
+| | |
+|:---:|:---:|
+| ![AFTI-16 trajectory](https://github.com/user-attachments/assets/287fa398-ea28-41f5-bf30-8d2bed285778) | ![AFTI-16 iterations](https://github.com/user-attachments/assets/95e99d31-d283-4cf9-9054-221199b13889) |
+| *AFTI-16 closed-loop trajectory tracking* | *Convergence iterations at each MPC step* |
+| ![CSTR trajectory](https://github.com/user-attachments/assets/8edecde7-9773-482b-a577-62522c28a1e2) | ![Scalability](https://github.com/user-attachments/assets/13fa5f74-d78d-4da1-bd41-bcb06a5bacfd) |
+| *CSTR trajectory tracking with disturbance* | *Per-iteration time vs. horizon and dimension* |
+
 ## API
 
 ### Model
