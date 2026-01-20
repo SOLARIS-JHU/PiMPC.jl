@@ -207,11 +207,11 @@ If you use πMPC in your research, please cite:
 ```bibtex
 @inproceedings{wu2026piMPC,
       title={piMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
-      author={Liang Wu, Bo Yang, Yilin Mo, and Jan Drgona},
-      year={2025},
-      eprint={2403.12938},
+      author={Liang Wu, Bo Yang, Yilin Mo, Yang Shi, and Jan Drgona},
+      year={2026},
+      eprint={2602.XXXXX},
       archivePrefix={arXiv},
-      url={https://arxiv.org/abs/2403.12938},
+      url={https://arxiv.org/abs/2602.XXXXX},
       volume={},
       number={},
 }
