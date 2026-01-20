@@ -16,7 +16,7 @@
    ╚═══════════════════════════════════════════════════════════╝
 ```
 
-# $\pi$MPC.jl
+# πMPC.jl
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-2403.12938-b31b1b.svg)](https://arxiv.org/abs/2403.12938)
