@@ -108,10 +108,10 @@ julia --project=. examples/AFTI16_example.jl
 
 | | |
 |:---:|:---:|
-| ![AFTI-16 iterations](https://github.com/user-attachments/assets/95e99d31-d283-4cf9-9054-221199b13889) | ![AFTI-16 trajectory](https://github.com/user-attachments/assets/287fa398-ea28-41f5-bf30-8d2bed285778) |
-| *Convergence iterations at each MPC step* | *AFTI-16 closed-loop trajectory tracking* |
-| ![CSTR trajectory](https://github.com/user-attachments/assets/8edecde7-9773-482b-a577-62522c28a1e2) | ![Scalability](https://github.com/user-attachments/assets/13fa5f74-d78d-4da1-bd41-bcb06a5bacfd) |
-| *CSTR trajectory tracking with disturbance* | *Per-iteration time vs. horizon and dimension* |
+| <img src="https://github.com/user-attachments/assets/95e99d31-d283-4cf9-9054-221199b13889" width="400"> | <img src="https://github.com/user-attachments/assets/287fa398-ea28-41f5-bf30-8d2bed285778" width="400"> |
+| *AFTI-16 closed-loop trajectory tracking* | *Convergence iterations at each MPC step* |
+| <img src="https://github.com/user-attachments/assets/8edecde7-9773-482b-a577-62522c28a1e2" width="400"> | <img src="https://github.com/user-attachments/assets/13fa5f74-d78d-4da1-bd41-bcb06a5bacfd" width="400"> |
+| *Per-iteration time vs. horizon and dimension* | *CSTR trajectory tracking with disturbance* |
 
 ## API
 
