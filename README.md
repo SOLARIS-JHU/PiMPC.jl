@@ -217,4 +217,4 @@ If you use πMPC in your research, please cite:
 ```
 
 ## Support and Bug reports
-Any support and questions for usage are welcome by contacting liangwu2019@gmail.com and bobyang17@163.com.
+For support or usage-related questions, please contact liangwu2019@gmail.com and bobyang17@163.com.
