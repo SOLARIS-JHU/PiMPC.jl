@@ -76,6 +76,9 @@ function simulate_closed_loop(model, A, B, C, x0, u0, yref_traj, uref, w, Nsim)
         # Update for next iteration
         x_current = x_next
         u_prev = u_apply
+        @info "Step $k"
+        @info "u = $(u_apply)"
+        @info "x = $(x_next)"
     end
 
     println("Simulation completed.")
