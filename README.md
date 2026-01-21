@@ -16,10 +16,10 @@
    ╚═══════════════════════════════════════════════════════════╝
 ```
 
-# $\pi$MPC.jl
+# πMPC.jl
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-2403.12938-b31b1b.svg)](https://arxiv.org/abs/2403.12938)
+[![arXiv](https://img.shields.io/badge/arXiv-2602.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2602.XXXXX)
 
 </div>
 
@@ -205,13 +205,13 @@ Falls back to CPU automatically if GPU is not available.
 If you use πMPC in your research, please cite:
 
 ```bibtex
-@inproceedings{wu2026PiMPC,
-      title={PiMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
-      author={Liang Wu, Bo Yang, Yilin Mo, and Jan Drgona},
-      year={2025},
-      eprint={2403.12938},
+@inproceedings{wu2026piMPC,
+      title={piMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
+      author={Liang Wu, Bo Yang, Yilin Mo, Yang Shi, and Jan Drgona},
+      year={2026},
+      eprint={2602.XXXXX},
       archivePrefix={arXiv},
-      url={https://arxiv.org/abs/2403.12938},
+      url={https://arxiv.org/abs/2602.XXXXX},
       volume={},
       number={},
 }
