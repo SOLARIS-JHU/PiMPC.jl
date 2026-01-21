@@ -57,6 +57,9 @@ using Pkg
 Pkg.add(url="https://github.com/SOLARIS-JHU/PiMPC.jl")
 ```
 
+### Support and Bug reports
+For support or usage-related questions, please contact liangwu2019@gmail.com and bobyang17@163.com.
+
 ## Quick Start
 
 ```julia
@@ -215,6 +218,3 @@ If you use πMPC in your research, please cite:
       number={},
 }
 ```
-
-## Support and Bug reports
-For support or usage-related questions, please contact liangwu2019@gmail.com and bobyang17@163.com.
