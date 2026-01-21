@@ -1,4 +1,4 @@
-module piMPC
+module PiMPC
 
 using LinearAlgebra
 using Printf

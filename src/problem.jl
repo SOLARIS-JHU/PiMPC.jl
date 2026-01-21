@@ -1,13 +1,13 @@
 """
     Model
 
-piMPC model. Create with `Model()`, configure with `setup!()`, solve with `solve!()`.
+PiMPC model. Create with `Model()`, configure with `setup!()`, solve with `solve!()`.
 
 ## Example
 ```julia
-m = piMPC.Model()
-piMPC.setup!(m; A=A, B=B, Np=20, umin=[-1.0], umax=[1.0])
-results = piMPC.solve!(m, x0, u0, yref, uref, w)
+m = PiMPC.Model()
+PiMPC.setup!(m; A=A, B=B, Np=20, umin=[-1.0], umax=[1.0])
+results = PiMPC.solve!(m, x0, u0, yref, uref, w)
 ```
 """
 mutable struct Model{T<:Real}

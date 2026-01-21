@@ -53,15 +53,15 @@ where $A$, $B$, $e$ are the state matrix, input matrix, and affine term of the d
 ## Installation
 
 ```bash
-git clone https://github.com/SOLARIS-JHU/piMPC.git
-cd piMPC
+git clone https://github.com/SOLARIS-JHU/PiMPC.jl.git
+cd PiMPC.jl
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 
 ## Quick Start
 
 ```julia
-using piMPC
+using PiMPC
 using LinearAlgebra
 
 # Define discrete linear system: x_{k+1} = A*x_k + B*u_k
@@ -205,8 +205,8 @@ Falls back to CPU automatically if GPU is not available.
 If you use πMPC in your research, please cite:
 
 ```bibtex
-@inproceedings{wu2026piMPC,
-      title={piMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
+@inproceedings{wu2026PiMPC,
+      title={PiMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
       author={Liang Wu, Bo Yang, Yilin Mo, and Jan Drgona},
       year={2025},
       eprint={2403.12938},

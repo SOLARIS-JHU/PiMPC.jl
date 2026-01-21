@@ -1,4 +1,4 @@
-using piMPC
+using PiMPC
 using LinearAlgebra
 using Printf
 using Plots
@@ -91,7 +91,7 @@ end
 # ============================================
 
 println("=" ^ 50)
-println("  piMPC - AFTI-16 Closed-Loop Simulation")
+println("  PiMPC - AFTI-16 Closed-Loop Simulation")
 println("=" ^ 50)
 
 # Build system

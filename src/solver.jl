@@ -20,9 +20,9 @@ Solve the MPC problem.
 
 ## Example
 ```julia
-m = piMPC.Model()
-piMPC.setup!(m; A=A, B=B, Np=20, umin=[-1.0], umax=[1.0], accel=true)
-results = piMPC.solve!(m, x0, u0, yref, uref, zeros(nx))
+m = PiMPC.Model()
+PiMPC.setup!(m; A=A, B=B, Np=20, umin=[-1.0], umax=[1.0], accel=true)
+results = PiMPC.solve!(m, x0, u0, yref, uref, zeros(nx))
 println(results.u[:, 1])  # Optimal input
 ```
 """
@@ -120,7 +120,7 @@ function _solve_cpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
     alpha_prev, res_prev, res = 1.0, Inf, Inf
     converged = false
 
-    verbose && println("piMPC ADMM Solver (CPU)")
+    verbose && println("PiMPC ADMM Solver (CPU)")
     verbose && println("-" ^ 40)
     verbose && @printf("  %6s  %12s\n", "Iter", "Residual")
     verbose && println("-" ^ 40)
@@ -302,7 +302,7 @@ function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
     alpha_prev, res_prev, res = const_one, const_one, T(Inf)
     converged = false
 
-    verbose && println("piMPC ADMM Solver (GPU)")
+    verbose && println("PiMPC ADMM Solver (GPU)")
     verbose && println("-" ^ 40)
     verbose && @printf("  %6s  %12s\n", "Iter", "Residual")
     verbose && println("-" ^ 40)

@@ -1,8 +1,8 @@
 using Test
-using piMPC
+using PiMPC
 using LinearAlgebra
 
-@testset "piMPC" begin
+@testset "PiMPC" begin
     @testset "Model + setup!" begin
         A = [1.0 0.1; 0.0 1.0]
         B = reshape([0.005; 0.1], :, 1)
