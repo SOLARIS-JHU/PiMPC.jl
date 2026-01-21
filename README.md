@@ -53,9 +53,8 @@ where $A$, $B$, $e$ are the state matrix, input matrix, and affine term of the d
 ## Installation
 
 ```bash
-git clone https://github.com/SOLARIS-JHU/PiMPC.jl.git
-cd PiMPC.jl
-julia --project=. -e 'using Pkg; Pkg.instantiate()'
+using Pkg
+Pkg.add(url="https://github.com/SOLARIS-JHU/PiMPC.jl")
 ```
 
 ## Quick Start
