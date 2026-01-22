@@ -19,7 +19,7 @@
 # πMPC.jl
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-2602.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2602.XXXXX)
+[![arXiv](https://img.shields.io/badge/arXiv-2601.14414-b31b1b.svg)](https://arxiv.org/abs/2601.14414)
 
 </div>
 
@@ -211,9 +211,9 @@ If you use πMPC in your research, please cite:
       title={piMPC: A Parallel-in-horizon and Construction-free NMPC Solver},
       author={Liang Wu, Bo Yang, Yilin Mo, Yang Shi, and Jan Drgona},
       year={2026},
-      eprint={2602.XXXXX},
+      eprint={2601.14414},
       archivePrefix={arXiv},
-      url={https://arxiv.org/abs/2602.XXXXX},
+      url={https://arxiv.org/abs/2601.14414},
       volume={},
       number={},
 }
