@@ -1,4 +1,4 @@
-A Python port of [PiMPC](https://github.com/shaoanlu/PiMPC-python).
+A Python port of [PiMPC](https://github.com/SOLARIS-JHU/PiMPC.jl).
 
 ## Installation
 Clone this repository
