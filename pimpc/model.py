@@ -42,6 +42,7 @@ class Model:
 
         # State
         self.is_setup = False
+        self.is_time_varying = False
         self.warm_vars = None
 
     def setup(
@@ -72,11 +73,25 @@ class Model:
     ):
         A = np.asarray(A, dtype=self.dtype)
         B = np.asarray(B, dtype=self.dtype)
-        if A.ndim != 2 or B.ndim != 2:
-            raise ValueError("A and B must be 2D arrays.")
-        nx, nu = B.shape
-        if A.shape != (nx, nx):
-            raise ValueError("A must be square and compatible with B.")
+        if A.ndim not in (2, 3) or B.ndim not in (2, 3):
+            raise ValueError("A and B must be 2D or 3D arrays.")
+        if A.ndim != B.ndim:
+            raise ValueError("A and B must have the same number of dimensions.")
+        if A.ndim == 2:
+            nx, nu = B.shape
+            if A.shape != (nx, nx):
+                raise ValueError("A must be square and compatible with B.")
+        else:
+            nsteps, nx, nx2 = A.shape
+            if nx != nx2:
+                raise ValueError("A must be square for each time step.")
+            if B.shape[0] != nsteps or B.shape[1] != nx:
+                raise ValueError("B must have shape (Np, nx, nu) to match A.")
+            nu = B.shape[2]
+
+        Np = int(Np)
+        if A.ndim == 3 and A.shape[0] != Np:
+            raise ValueError("A and B must have Np time steps.")
 
         if C is None:
             C = np.eye(nx, dtype=self.dtype)
@@ -133,7 +148,8 @@ class Model:
         self.nx = nx
         self.nu = nu
         self.ny = ny
-        self.Np = int(Np)
+        self.Np = Np
+        self.is_time_varying = A.ndim == 3
 
         self.Wy = Wy
         self.Wu = Wu

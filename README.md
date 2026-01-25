@@ -11,9 +11,13 @@ pip install -e .
 ```
 
 ## Usage
-Refer to [examples](examples/)
+Refer to [examples](examples/):
+- `examples/afti16_example.py` (linear AFTI-16 aircraft model)
+- `examples/unicycle_nmpc_example.py` (nonlinear unicycle with time-varying linearization)
 
 ![](assets/example_afti16.png)
+
+![](assets/example_unicycle.png)
 
 ## Testing
 ```bash
