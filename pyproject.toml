@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pimpc"
+version = "0.0.0"
+description = "Parallel-in-horizon MPC solver (Python port)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+gpu = ["cupy"]
+dev = ["pytest", "scipy", "matplotlib"]
+
+[tool.setuptools.packages.find]
+include = ["pimpc*"]
