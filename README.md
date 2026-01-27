@@ -54,7 +54,7 @@ where $A$, $B$, $e$ are the state matrix, input matrix, and affine term of the d
 
 ```bash
 using Pkg
-Pkg.add(url="https://github.com/SOLARIS-JHU/PiMPC.jl")
+Pkg.add("PiMPC")
 ```
 
 ### Support and Bug reports
