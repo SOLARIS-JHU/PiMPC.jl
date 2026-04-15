@@ -144,8 +144,8 @@ function setup!(m::Model{T};
     m.dumax = dumax === nothing ? fill(T(Inf), nu)  : Vector{T}(dumax)
 
     # Set solver settings
-    if device == :gpu && !CUDA.functional()
-        @warn "GPU not available, falling back to CPU"
+    if device == :gpu && !_cuda_ok()
+        @warn "GPU not available (CUDA.jl not loaded or no functional GPU), falling back to CPU"
         device = :cpu
     end
     m.rho, m.tol, m.eta = T(rho), T(tol), T(eta)

@@ -31,7 +31,7 @@ function solve!(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector,
     !m.is_setup && error("Model not setup. Call setup!() first.")
 
     # Call internal solver
-    if m.device == :gpu && CUDA.functional()
+    if m.device == :gpu && _cuda_ok()
         x, u, du, info, warm = _solve_gpu(m, x0, u0, yref, uref, w; warm_vars=m.warm_vars, verbose=verbose)
     else
         x, u, du, info, warm = _solve_cpu(m, x0, u0, yref, uref, w; warm_vars=m.warm_vars, verbose=verbose)
