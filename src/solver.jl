@@ -7,7 +7,10 @@ Solve the MPC problem.
 - `model::Model`: Configured model (call `setup!` first)
 - `x0::Vector`: Current state (nx)
 - `u0::Vector`: Previous input (nu)
-- `yref::Vector`: Output reference (ny)
+- `yref`: Output reference — either
+    - `::Vector(ny)`: constant target over the prediction horizon, or
+    - `::Matrix(ny, Np)`: per-stage targets, column `k` being the reference at
+      predicted stage `k` (used for path tracking with moving references)
 - `uref::Vector`: Input reference (nu)
 - `w::Vector`: Known disturbance (nx), use `zeros(nx)` if none
 
@@ -22,19 +25,27 @@ Solve the MPC problem.
 ```julia
 m = PiMPC.Model()
 PiMPC.setup!(m; A=A, B=B, Np=20, umin=[-1.0], umax=[1.0], accel=true)
+
+# Constant reference
 results = PiMPC.solve!(m, x0, u0, yref, uref, zeros(nx))
+
+# Per-stage reference (path tracking)
+yref_horizon = hcat([target_at_stage(k) for k in 1:20]...)   # (ny, Np)
+results = PiMPC.solve!(m, x0, u0, yref_horizon, uref, zeros(nx))
 println(results.u[:, 1])  # Optimal input
 ```
 """
-function solve!(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector,
-                w::Vector; verbose::Bool=false)
+function solve!(m::Model, x0::Vector, u0::Vector, yref::AbstractVecOrMat,
+                uref::Vector, w::Vector; verbose::Bool=false)
     !m.is_setup && error("Model not setup. Call setup!() first.")
+
+    yref_mat = _expand_yref(yref, m.ny, m.Np)
 
     # Call internal solver
     if m.device == :gpu && _cuda_ok()
-        x, u, du, info, warm = _solve_gpu(m, x0, u0, yref, uref, w; warm_vars=m.warm_vars, verbose=verbose)
+        x, u, du, info, warm = _solve_gpu(m, x0, u0, yref_mat, uref, w; warm_vars=m.warm_vars, verbose=verbose)
     else
-        x, u, du, info, warm = _solve_cpu(m, x0, u0, yref, uref, w; warm_vars=m.warm_vars, verbose=verbose)
+        x, u, du, info, warm = _solve_cpu(m, x0, u0, yref_mat, uref, w; warm_vars=m.warm_vars, verbose=verbose)
     end
 
     # Update warm start
@@ -43,7 +54,24 @@ function solve!(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector,
     return Results(x, u, du, info)
 end
 
-function _solve_cpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector,
+# Normalise yref to a Matrix(ny, Np) of per-stage references.
+function _expand_yref(yref::AbstractVector, ny::Int, Np::Int)
+    length(yref) == ny || error("yref vector length $(length(yref)) ≠ ny = $ny")
+    return repeat(reshape(collect(yref), ny, 1), 1, Np)
+end
+function _expand_yref(yref::AbstractMatrix, ny::Int, Np::Int)
+    size(yref, 1) == ny || error("yref first dim $(size(yref,1)) ≠ ny = $ny")
+    nc = size(yref, 2)
+    if nc == Np
+        return Matrix(yref)
+    elseif nc == 1
+        return repeat(Matrix(yref), 1, Np)
+    else
+        error("yref must have $Np or 1 columns (got $nc)")
+    end
+end
+
+function _solve_cpu(m::Model, x0::Vector, u0::Vector, yref::AbstractMatrix, uref::Vector,
                     w::Vector; warm_vars=nothing, verbose::Bool=false)
     nx, nu, ny, Np = m.nx, m.nu, m.ny, m.Np
     nx_bar = nx + nu
@@ -74,12 +102,15 @@ function _solve_cpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
         E_diag, E_inv = I(nx_bar), I(nx_bar)
     end
 
-    # Cost matrices
+    # Cost matrices.  yref is (ny, Np): column k is the reference at predicted
+    # stage k.  q_bar is per-stage (nx_bar × Np-1) — column k feeds the update
+    # for X[:, k+1] (stages 1..Np-1).  Terminal stage Np uses q_bar_N (Vector).
     C_part = C_bar[:, 1:nx]
     Q_bar = [C_part' * m.Wy * C_part zeros(nx, nu); zeros(nu, nx) m.Wu]
     Q_bar_N = [C_part' * m.Wf * C_part zeros(nx, nu); zeros(nu, nx) m.Wu]
-    q_bar = [C_part' * m.Wy * yref; m.Wu * uref]
-    q_bar_N = [C_part' * m.Wf * yref; m.Wu * uref]
+    Wu_uref = m.Wu * uref
+    q_bar = vcat(C_part' * m.Wy * yref[:, 1:Np-1], repeat(Wu_uref, 1, Np-1))
+    q_bar_N = vcat(C_part' * m.Wf * yref[:, Np], Wu_uref)
     R_bar = m.Wdu
 
     # Precompute inverse matrices
@@ -217,7 +248,7 @@ function _solve_cpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
     return x_traj, u_traj, DU, info, warm
 end
 
-function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector,
+function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::AbstractMatrix, uref::Vector,
                     w::Vector; warm_vars=nothing, verbose::Bool=false)
     nx, nu, ny, Np = m.nx, m.nu, m.ny, m.Np
     nx_bar = nx + nu
@@ -256,10 +287,13 @@ function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
     end
 
     C_part = C_bar[:, 1:nx]
-    Q_bar = [C_part' * T.(m.Wy) * C_part zeros(T, nx, nu); zeros(T, nu, nx) T.(m.Wu)]
-    Q_bar_N = [C_part' * T.(m.Wf) * C_part zeros(T, nx, nu); zeros(T, nu, nx) T.(m.Wu)]
-    q_bar = [C_part' * T.(m.Wy) * T.(yref); T.(m.Wu) * T.(uref)]
-    q_bar_N = [C_part' * T.(m.Wf) * T.(yref); T.(m.Wu) * T.(uref)]
+    Wy_T = T.(m.Wy); Wf_T = T.(m.Wf); Wu_T = T.(m.Wu)
+    yref_T = T.(yref); uref_T = T.(uref)
+    Q_bar = [C_part' * Wy_T * C_part zeros(T, nx, nu); zeros(T, nu, nx) Wu_T]
+    Q_bar_N = [C_part' * Wf_T * C_part zeros(T, nx, nu); zeros(T, nu, nx) Wu_T]
+    Wu_uref = Wu_T * uref_T
+    q_bar = vcat(C_part' * Wy_T * yref_T[:, 1:Np-1], repeat(Wu_uref, 1, Np-1))
+    q_bar_N = vcat(C_part' * Wf_T * yref_T[:, Np], Wu_uref)
     R_bar = T.(m.Wdu)
 
     J_B = inv(R_bar + rho * B_bar'*B_bar) * B_bar'
@@ -325,9 +359,9 @@ function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
                 @. d_Theta = d_Theta_hat + d_X[:, 2:Np+1] - d_Z
                 @. d_Beta = d_Beta_hat + d_BU - d_V
                 @. d_Lambda = d_Lambda_hat + d_Z - d_AX - d_V - d_e_bar - d_w_bar
-                res = rho * (CUDA.norm(d_Theta - d_Theta_hat)^2 + CUDA.norm(d_Beta - d_Beta_hat)^2 +
-                            CUDA.norm(d_Lambda - d_Lambda_hat)^2 + CUDA.norm(d_Z - d_Z_hat)^2 +
-                            CUDA.norm(d_V - d_V_hat)^2 + CUDA.norm((d_Z - d_V) - (d_Z_hat - d_V_hat))^2)
+                res = rho * (norm(d_Theta - d_Theta_hat)^2 + norm(d_Beta - d_Beta_hat)^2 +
+                            norm(d_Lambda - d_Lambda_hat)^2 + norm(d_Z - d_Z_hat)^2 +
+                            norm(d_V - d_V_hat)^2 + norm((d_Z - d_V) - (d_Z_hat - d_V_hat))^2)
             end
         else
             @views begin
@@ -342,9 +376,9 @@ function _solve_gpu(m::Model, x0::Vector, u0::Vector, yref::Vector, uref::Vector
                 @. d_Theta = d_Theta + d_X[:, 2:Np+1] - d_Z
                 @. d_Beta = d_Beta + d_BU - d_V
                 @. d_Lambda = d_Lambda + d_Z - d_AX - d_V - d_e_bar - d_w_bar
-                res = rho * (CUDA.norm(d_Theta - d_Theta_prev)^2 + CUDA.norm(d_Beta - d_Beta_prev)^2 +
-                            CUDA.norm(d_Lambda - d_Lambda_prev)^2 + CUDA.norm(d_Z - d_Z_prev)^2 +
-                            CUDA.norm(d_V - d_V_prev)^2 + CUDA.norm((d_Z - d_V) - (d_Z_prev - d_V_prev))^2)
+                res = rho * (norm(d_Theta - d_Theta_prev)^2 + norm(d_Beta - d_Beta_prev)^2 +
+                            norm(d_Lambda - d_Lambda_prev)^2 + norm(d_Z - d_Z_prev)^2 +
+                            norm(d_V - d_V_prev)^2 + norm((d_Z - d_V) - (d_Z_prev - d_V_prev))^2)
             end
         end
 

@@ -18,7 +18,13 @@ function __init__()
     pkg = Base.identify_package("CUDA")
     if pkg !== nothing
         try
-            Base.require(pkg)   # loads into the calling module (PiMPC)
+            mod = Base.require(pkg)
+            # Bind the loaded module as `PiMPC.CUDA` (used dotted, e.g.
+            # `CUDA.zeros`, `CUDA.norm`) and the bare `cu` constructor used
+            # throughout `_solve_gpu`.  `Base.require` only loads — it does
+            # not create bindings in the caller.
+            Core.eval(PiMPC, :(const CUDA = $mod))
+            Core.eval(PiMPC, :(const cu   = $(mod).cu))
             _CUDA_LOADED[] = true
         catch
         end
