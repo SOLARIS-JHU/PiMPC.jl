@@ -103,7 +103,13 @@ results2 = solve!(model, x_next, u_next, yref, uref, w)
 
 ## Example
 
-Run the AFTI-16 aircraft closed-loop simulation:
+See live_demo.executed.ipynb
+
+<img width="720" height="460" alt="fig_cartpole" src="https://github.com/user-attachments/assets/583820b9-7bee-4a1c-8afc-4f0f6e572169" />
+
+<img width="960" height="280" alt="fig_trailer" src="https://github.com/user-attachments/assets/de4a2b8e-586a-453d-8541-93081f23194d" />
+
+<img width="760" height="480" alt="fig_quad" src="https://github.com/user-attachments/assets/51f1c1fd-33ed-41f1-8d6e-61d426d49380" />
 
 ```bash
 julia --project=. examples/AFTI16_example.jl
