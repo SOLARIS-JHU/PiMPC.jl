@@ -16,7 +16,7 @@
    ╚═══════════════════════════════════════════════════════════╝
 ```
 
-# πMPC.jl
+# πMPC.jl (Julia implementation) and πTorch-MPC (PyTorch implementation)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-2601.14414-b31b1b.svg)](https://arxiv.org/abs/2601.14414)
