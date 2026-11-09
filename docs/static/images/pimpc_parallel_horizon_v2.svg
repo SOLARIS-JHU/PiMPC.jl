@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="figure-title figure-desc">
+<title id="figure-title">How πMPC updates the prediction horizon</title>
+<desc id="figure-desc">Interactive ADMM schedule with word explanations, CPU and GPU work allocation, illustrative consensus residuals, and equations. Three representative columns show parallel horizon stages and ordered update phases.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#6885ab"/></marker>
+  <marker id="arrow-bright" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#42b8ed"/></marker>
+  <style><![CDATA[
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;fill:#1d1d1f}
+    .heading{font-size:29px;font-weight:750}.sub{font-size:13px;fill:#6e6e73}.small{font-size:12px;fill:#6e6e73}.label{font-size:13px;font-weight:750;fill:#0071e3;letter-spacing:.025em}.equation{font-family:Cambria Math,Georgia,serif;font-size:17px}.phase-title{font-size:14px;font-weight:750}.phase-copy{font-size:12px;fill:#6e6e73}.stage-head{font-size:15px;font-weight:750;text-anchor:middle}.stage-detail{font-size:11px;fill:#6e6e73;text-anchor:middle}
+    .panel{fill:#fff;stroke:#d2d2d7;stroke-width:1.2}.stage{fill:#fff;stroke:#d2d2d7;stroke-width:1.2}.phase{fill:#fff;stroke:#d2d2d7;stroke-width:1.2;transition:fill .2s,stroke .2s,opacity .2s}.phase.active{fill:#e8f2ff;stroke:#0071e3;stroke-width:2}.phase.dim{opacity:.48}.phase.done{fill:#f0f7ff;stroke:#8fc4f8}
+    .line{fill:none;stroke:#8a8a90;stroke-width:1.4;marker-end:url(#arrow)}.read{fill:none;stroke:#0071e3;stroke-width:1.3;stroke-dasharray:5 5;marker-end:url(#arrow-bright)}.return{fill:none;stroke:#0071e3;stroke-width:2;marker-end:url(#arrow-bright)}
+    .control{cursor:pointer}.control rect{fill:#fff;stroke:#d2d2d7;stroke-width:1.2}.control text{font-size:13px;font-weight:700;text-anchor:middle}.control.on rect{fill:#0071e3;stroke:#0071e3}.control.on text{fill:#fff}.control:hover rect{stroke:#0071e3;stroke-width:2}.control:focus-visible rect{stroke:#0071e3;stroke-width:3}
+    .standard-node{fill:#fff;stroke:#c8c8cd;stroke-width:1.4}.standard-active{fill:#fff0f0;stroke:#c94848;stroke-width:2}.hidden{display:none}
+    #equations{display:none}#equations.open{display:block}.eq-bg{fill:#fff;stroke:#8fc4f8;stroke-width:1.5}.eq-text{font-family:Cambria Math,Georgia,serif;font-size:18px}.eq-note{font-size:12px;fill:#6e6e73}
+    .footer-note{font-size:11px;fill:#6e6e73}.tile{fill:#edf3f8;stroke:#a9bed1;stroke-width:1}.tile.on{fill:#d9ecff;stroke:#0071e3}.res-track{fill:#e5e5ea}.res-bar{fill:#0071e3;transition:width .2s}.res-label{font-size:13px;fill:#1d1d1f}.mode-panel{fill:#fff;stroke:#d2d2d7;stroke-width:1.2}
+  ]]></style>
+</defs>
+<rect width="1600" height="1000" fill="#f5f5f7"/>
+<text x="34" y="43" class="heading">πMPC · one horizon, parallel stage updates</text>
+<text x="34" y="66" class="sub">Choose a phase to see what is computed together and where information crosses stages.</text>
+
+<g class="control on" id="pimpc-button" role="button" tabindex="0" aria-label="Show πMPC" onclick="setMode('pimpc')" onkeydown="keyActivate(event,'pimpc')"><rect x="34" y="84" width="90" height="34" rx="5"/><text x="79" y="106">πMPC</text></g>
+<g id="standard-side" class="hidden">
+  <rect x="1200" y="140" width="366" height="616" rx="7" class="mode-panel"/>
+  <text x="1222" y="174" class="label">WHY THIS VIEW IS SEQUENTIAL</text>
+  <text x="1222" y="214" class="res-label">Riccati backward pass</text>
+  <text x="1222" y="244" class="small">The primal subproblem is solved by</text>
+  <text x="1222" y="264" class="small">a recursion from stage N−1 to k=0.</text>
+  <text x="1222" y="284" class="small">Each result depends on the next one.</text>
+  <path class="line" d="M1240 348H1530"/>
+  <text x="1222" y="402" class="res-label">Projection can be parallel</text>
+  <text x="1222" y="431" class="small">Independent constraints can be</text>
+  <text x="1222" y="451" class="small">projected after the primal solve.</text>
+  <text x="1222" y="471" class="small">That does not remove its recursion.</text>
+  <line x1="1222" y1="520" x2="1544" y2="520" stroke="#d2d2d7"/>
+  <text x="1222" y="556" class="res-label">Compare with πMPC</text>
+  <text x="1222" y="585" class="small">The new split makes each stage's</text>
+  <text x="1222" y="605" class="small">ADMM updates use frozen values</text>
+  <text x="1222" y="625" class="small">and phase-level synchronization.</text>
+  <text x="1222" y="709" class="footer-note">This is the Riccati-based variant.</text>
+</g>
+<g class="control" id="standard-button" role="button" tabindex="0" aria-label="Show Riccati ADMM" onclick="setMode('standard')" onkeydown="keyActivate(event,'standard')"><rect x="132" y="84" width="150" height="34" rx="5"/><text x="207" y="106">Riccati ADMM</text></g>
+<g class="control" id="play-button" role="button" tabindex="0" aria-label="Pause animation" onclick="togglePlay()" onkeydown="keyActivate(event,'play')"><rect x="294" y="84" width="88" height="34" rx="5"/><text id="play-label" x="338" y="106">Pause</text></g>
+<text x="405" y="106" class="small">PHASE</text>
+<foreignObject x="456" y="84" width="335" height="38"><xhtml:div style="display:flex;align-items:center;height:34px;gap:12px;color:#1d1d1f;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"><xhtml:input id="phase-slider" type="range" min="0" max="4" value="0" step="1" aria-label="ADMM phase" oninput="setPhase(Number(this.value))" style="width:265px;accent-color:#0071e3"/><xhtml:span id="phase-value">1 / 5</xhtml:span></xhtml:div></foreignObject>
+<g class="control" id="equations-button" role="button" tabindex="0" aria-label="Show equations" onclick="toggleEquations()" onkeydown="keyActivate(event,'equations')"><rect x="807" y="84" width="164" height="34" rx="5"/><text id="equations-label" x="889" y="106">Show equations</text></g>
+<g class="control on" id="gpu-button" role="button" tabindex="0" aria-label="Show GPU work allocation" onclick="setDevice('gpu')" onkeydown="keyActivate(event,'gpu')"><rect x="988" y="84" width="77" height="34" rx="5"/><text x="1026" y="106">GPU</text></g>
+<g class="control" id="cpu-button" role="button" tabindex="0" aria-label="Show CPU work allocation" onclick="setDevice('cpu')" onkeydown="keyActivate(event,'cpu')"><rect x="1073" y="84" width="77" height="34" rx="5"/><text x="1111" y="106">CPU</text></g>
+<g id="core-controls" class="hidden">
+  <text x="1167" y="106" class="small">CORES</text>
+  <g class="control" data-cores="1" role="button" tabindex="0" aria-label="Use one CPU core" onclick="setCores(1)" onkeydown="keyActivate(event,'cores1')"><rect x="1220" y="84" width="36" height="34" rx="5"/><text x="1238" y="106">1</text></g>
+  <g class="control" data-cores="2" role="button" tabindex="0" aria-label="Use two CPU cores" onclick="setCores(2)" onkeydown="keyActivate(event,'cores2')"><rect x="1261" y="84" width="36" height="34" rx="5"/><text x="1279" y="106">2</text></g>
+  <g class="control on" data-cores="4" role="button" tabindex="0" aria-label="Use four CPU cores" onclick="setCores(4)" onkeydown="keyActivate(event,'cores4')"><rect x="1302" y="84" width="36" height="34" rx="5"/><text x="1320" y="106">4</text></g>
+  <g class="control" data-cores="8" role="button" tabindex="0" aria-label="Use eight CPU cores" onclick="setCores(8)" onkeydown="keyActivate(event,'cores8')"><rect x="1343" y="84" width="36" height="34" rx="5"/><text x="1361" y="106">8</text></g>
+</g>
+<text x="1566" y="106" class="small" text-anchor="end">N stages · three shown</text>
+
+<g id="pimpc-view">
+  <rect x="34" y="140" width="1132" height="520" rx="7" class="panel"/>
+  <text x="54" y="171" class="label">THE KEY SPLIT</text>
+  <text x="54" y="201" class="equation">vₖ = B̄ₜ,ₖ Δuₖ</text>
+  <text x="54" y="225" class="small">The input's effect is copied locally.</text>
+  <text x="54" y="242" class="small">The state copy zₖ₊₁ carries</text>
+  <text x="54" y="259" class="small">the dynamics constraint.</text>
+  <path d="M270 154V644" stroke="#d2d2d7" stroke-width="1"/>
+  <text x="54" y="313" class="phase-title">Frozen iterate</text><text x="54" y="333" class="phase-copy">previous / extrapolated values</text>
+  <text x="54" y="403" class="phase-title">1 · Primal</text><text x="54" y="423" class="phase-copy">Δu, augmented state x̄</text>
+  <text x="54" y="493" class="phase-title">2 · Project / copy</text><text x="54" y="513" class="phase-copy">constrained z, effect v</text>
+  <text x="54" y="583" class="phase-title">3 · Dual</text><text x="54" y="603" class="phase-copy">θ, β, λ enforce consistency</text>
+  <text x="285" y="168" class="label">PREDICTION HORIZON</text>
+
+  <g id="columns">
+    <g transform="translate(294 0)">
+      <text x="100" y="196" class="stage-head">k = 0</text><text x="100" y="215" class="stage-detail">first stage</text>
+      <rect class="phase" data-phase="0" x="12" y="281" width="176" height="58" rx="5"/><text x="100" y="306" class="stage-head">ẑ, v̂, θ̂, β̂, λ̂</text><text x="100" y="325" class="stage-detail">read only</text>
+      <rect class="phase" data-phase="1" x="12" y="371" width="176" height="58" rx="5"/><text x="100" y="397" class="stage-head">Δu₀, x̄₁</text><text x="100" y="416" class="stage-detail">local closed form</text>
+      <rect class="phase" data-phase="2" x="12" y="461" width="176" height="58" rx="5"/><text x="100" y="487" class="stage-head">z₁, v₀</text><text x="100" y="506" class="stage-detail">joint projection + copy</text>
+      <rect class="phase" data-phase="3" x="12" y="551" width="176" height="58" rx="5"/><text x="100" y="577" class="stage-head">θ₀, β₀, λ₀</text><text x="100" y="596" class="stage-detail">three split residuals</text>
+    </g>
+    <g transform="translate(508 0)">
+      <text x="100" y="196" class="stage-head">k = 1</text><text x="100" y="215" class="stage-detail">interior stage</text>
+      <rect class="phase" data-phase="0" x="12" y="281" width="176" height="58" rx="5"/><text x="100" y="306" class="stage-head">ẑ, v̂, θ̂, β̂, λ̂</text><text x="100" y="325" class="stage-detail">read only</text>
+      <rect class="phase" data-phase="1" x="12" y="371" width="176" height="58" rx="5"/><text x="100" y="397" class="stage-head">Δu₁, x̄₂</text><text x="100" y="416" class="stage-detail">local closed form</text>
+      <rect class="phase" data-phase="2" x="12" y="461" width="176" height="58" rx="5"/><text x="100" y="487" class="stage-head">z₂, v₁</text><text x="100" y="506" class="stage-detail">joint projection + copy</text>
+      <rect class="phase" data-phase="3" x="12" y="551" width="176" height="58" rx="5"/><text x="100" y="577" class="stage-head">θ₁, β₁, λ₁</text><text x="100" y="596" class="stage-detail">three split residuals</text>
+    </g>
+    <text x="822" y="405" class="heading" text-anchor="middle">···</text>
+    <g transform="translate(956 0)">
+      <text x="100" y="196" class="stage-head">k = N−1</text><text x="100" y="215" class="stage-detail">terminal update differs</text>
+      <rect class="phase" data-phase="0" x="12" y="281" width="176" height="58" rx="5"/><text x="100" y="306" class="stage-head">ẑ, v̂, θ̂, β̂, λ̂</text><text x="100" y="325" class="stage-detail">read only</text>
+      <rect class="phase" data-phase="1" x="12" y="371" width="176" height="58" rx="5"/><text x="100" y="397" class="stage-head">Δuₙ₋₁, x̄ₙ</text><text x="100" y="416" class="stage-detail">terminal operator Hₐₙ</text>
+      <rect class="phase" data-phase="2" x="12" y="461" width="176" height="58" rx="5"/><text x="100" y="487" class="stage-head">zₙ, vₙ₋₁</text><text x="100" y="506" class="stage-detail">joint projection + copy</text>
+      <rect class="phase" data-phase="3" x="12" y="551" width="176" height="58" rx="5"/><text x="100" y="577" class="stage-head">θₙ₋₁, βₙ₋₁, λₙ₋₁</text><text x="100" y="596" class="stage-detail">three split residuals</text>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <path class="line" d="M394 340V368 M394 430V458 M394 520V548 M608 340V368 M608 430V458 M608 520V548 M1056 340V368 M1056 430V458 M1056 520V548"/>
+    <path class="read" d="M580 339L430 370 M794 339L644 370 M580 429L430 460 M794 429L644 460"/>
+    <path d="M394 610V624 H608 M608 610V624 M1056 610V624 H608" fill="none" stroke="#6885ab" stroke-width="1.4"/>
+  </g>
+  <text x="719" y="249" class="small" text-anchor="middle">Dashed arrows: adjacent cached reads or previous-stage new state at the next phase</text>
+  <text x="719" y="642" class="label" text-anchor="middle">All stage columns finish before the global check</text>
+</g>
+
+<g id="standard-view" class="hidden">
+  <rect x="34" y="140" width="1132" height="520" rx="7" class="panel"/>
+  <text x="60" y="180" class="label">RICCATI-BASED ADMM · PRIMAL SUBPROBLEM</text>
+  <text x="60" y="215" class="heading">A backward recursion carries a dependency across the horizon.</text>
+  <text x="60" y="242" class="sub">Each step of this Riccati sweep needs the result from the next stage; projection can still run across stages afterward.</text>
+  <g id="riccati-chain">
+    <rect x="86" y="316" width="208" height="104" rx="6" class="standard-node"/><text x="190" y="356" class="stage-head">k = N−1</text><text x="190" y="382" class="small" text-anchor="middle">terminal recursion</text>
+    <rect x="368" y="316" width="208" height="104" rx="6" class="standard-node"/><text x="472" y="356" class="stage-head">k = N−2</text><text x="472" y="382" class="small" text-anchor="middle">wait for k+1</text>
+    <rect x="650" y="316" width="208" height="104" rx="6" class="standard-node"/><text x="754" y="356" class="stage-head">···</text><text x="754" y="382" class="small" text-anchor="middle">sequential sweep</text>
+    <rect x="932" y="316" width="208" height="104" rx="6" class="standard-node"/><text x="1036" y="356" class="stage-head">k = 0</text><text x="1036" y="382" class="small" text-anchor="middle">last in backward pass</text>
+    <path class="line" d="M295 368H365 M577 368H647 M859 368H929"/>
+  </g>
+  <rect x="295" y="495" width="610" height="82" rx="6" class="phase"/><text x="600" y="529" class="stage-head">Then: stagewise projection and dual updates</text><text x="600" y="554" class="small" text-anchor="middle">The sequential primal dependency remains the critical path.</text>
+  <text x="600" y="626" class="sub" text-anchor="middle">This comparison describes Riccati-based ADMM, not every possible ADMM formulation.</text>
+</g>
+
+<g id="global-phase">
+  <rect x="196" y="680" width="808" height="76" rx="7" class="phase" data-phase="4"/>
+  <text x="600" y="709" class="stage-head">4 · Sum residuals → check convergence → extrapolate or restart</text>
+  <text x="600" y="733" class="small" text-anchor="middle">Reduction is global; Nesterov updates the next frozen iterate across stage columns.</text>
+</g>
+<g id="explanation-panel">
+  <rect x="1200" y="140" width="366" height="616" rx="7" class="mode-panel"/>
+  <text x="1222" y="172" class="label">WHAT THIS PHASE DOES</text>
+  <text id="phase-heading" x="1222" y="202" class="phase-title">Frozen iterate</text>
+  <text id="phase-line-1" x="1222" y="232" class="small">Every stage reads the same previous</text>
+  <text id="phase-line-2" x="1222" y="251" class="small">or Nesterov-extrapolated iterate.</text>
+  <text id="phase-line-3" x="1222" y="270" class="small">No new stage update is needed yet.</text>
+  <line x1="1222" y1="290" x2="1544" y2="290" stroke="#d2d2d7"/>
+  <text id="device-heading" x="1222" y="319" class="label">GPU WORK ALLOCATION</text>
+  <text id="device-line-1" x="1222" y="345" class="small">A kernel processes many stage columns.</text>
+  <text id="device-line-2" x="1222" y="363" class="small">Tiles show possible concurrent work.</text>
+  <g id="gpu-layout">
+    <text x="1226" y="404" class="small">horizon columns →</text>
+    <text x="1244" y="438" class="small">k0</text><text x="1299" y="438" class="small">k1</text><text x="1354" y="438" class="small">k2</text><text x="1409" y="438" class="small">k3</text><text x="1464" y="438" class="small">···</text><text x="1504" y="438" class="small">kN−1</text>
+    <rect class="tile" x="1222" y="451" width="42" height="42" rx="4"/><rect class="tile" x="1277" y="451" width="42" height="42" rx="4"/><rect class="tile" x="1332" y="451" width="42" height="42" rx="4"/><rect class="tile" x="1387" y="451" width="42" height="42" rx="4"/><rect class="tile" x="1442" y="451" width="42" height="42" rx="4"/><rect class="tile" x="1497" y="451" width="42" height="42" rx="4"/>
+    <rect class="tile" x="1222" y="505" width="42" height="42" rx="4"/><rect class="tile" x="1277" y="505" width="42" height="42" rx="4"/><rect class="tile" x="1332" y="505" width="42" height="42" rx="4"/><rect class="tile" x="1387" y="505" width="42" height="42" rx="4"/><rect class="tile" x="1442" y="505" width="42" height="42" rx="4"/><rect class="tile" x="1497" y="505" width="42" height="42" rx="4"/>
+    <text x="1222" y="584" class="small">The implementation selects its actual tiling.</text>
+  </g>
+  <g id="cpu-layout" class="hidden">
+    <text id="cpu-schedule-label" x="1222" y="409" class="small">Illustrative four-core schedule</text>
+    <rect class="tile" x="1222" y="430" width="145" height="48" rx="4"/><text x="1234" y="460" class="res-label">core 1 · k0</text>
+    <rect class="tile" x="1390" y="430" width="145" height="48" rx="4"/><text x="1402" y="460" class="res-label">core 2 · k1</text>
+    <rect class="tile" x="1222" y="493" width="145" height="48" rx="4"/><text x="1234" y="523" class="res-label">core 3 · k2</text>
+    <rect class="tile" x="1390" y="493" width="145" height="48" rx="4"/><text x="1402" y="523" class="res-label">core 4 · k3</text>
+    <text x="1222" y="584" class="small">More stages run in later batches.</text>
+  </g>
+  <line x1="1222" y1="610" x2="1544" y2="610" stroke="#d2d2d7"/>
+  <text x="1222" y="636" class="label">AFTER ALL STAGES FINISH</text>
+  <text x="1222" y="663" class="small">Reduce residuals across the horizon.</text>
+  <text x="1222" y="682" class="small">Check stopping; extrapolate or restart.</text>
+  <text x="1222" y="713" class="footer-note">Schematic work allocation, not a runtime profile.</text>
+</g>
+
+<g id="residual-panel">
+  <rect x="34" y="772" width="1532" height="188" rx="7" class="mode-panel"/>
+  <text x="56" y="803" class="label">CONSENSUS RESIDUALS · ILLUSTRATIVE ONLY</text>
+  <text x="56" y="824" class="small">The bars demonstrate convergence behavior; their values and relative rates do not represent benchmark measurements.</text>
+  <text x="56" y="859" class="res-label">state copy · ‖x̄ₖ₊₁ − zₖ₊₁‖</text><rect x="415" y="843" width="370" height="18" rx="7" class="res-track"/><rect id="res-state" x="415" y="843" width="340" height="18" rx="7" class="res-bar"/>
+  <text x="56" y="894" class="res-label">input effect · ‖B̄Δuₖ − vₖ‖</text><rect x="415" y="878" width="370" height="18" rx="7" class="res-track"/><rect id="res-input" x="415" y="878" width="330" height="18" rx="7" class="res-bar"/>
+  <text x="56" y="929" class="res-label">dynamics · ‖zₖ₊₁ − Āx̄ₖ − vₖ − ēₖ‖</text><rect x="415" y="913" width="370" height="18" rx="7" class="res-track"/><rect id="res-dynamics" x="415" y="913" width="350" height="18" rx="7" class="res-bar"/>
+  <text x="858" y="859" class="res-label">ADMM iteration i</text>
+  <foreignObject x="858" y="870" width="460" height="42"><xhtml:div style="display:flex;align-items:center;height:38px;gap:15px;color:#1d1d1f;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"><xhtml:input id="iteration-slider" type="range" min="0" max="25" value="0" step="1" aria-label="Illustrative ADMM iteration" oninput="setIteration(Number(this.value))" style="width:340px;accent-color:#0071e3"/><xhtml:span id="iteration-value">0 / 25</xhtml:span></xhtml:div></foreignObject>
+  <text x="858" y="936" class="small">Iteration slider controls this illustrative residual display.</text>
+</g>
+<text x="800" y="986" class="footer-note" text-anchor="middle">Algorithm schedule, not a timing benchmark or literal GPU thread assignment. Three representative stages are shown.</text>
+
+<g id="equations" aria-label="Equations explaining the split and stage updates">
+  <rect x="189" y="151" width="822" height="508" rx="8" class="eq-bg"/>
+  <text x="218" y="187" class="heading">Why the stages can update together</text>
+  <text x="218" y="217" class="label">1 · Velocity form and the key replacement</text>
+  <text x="218" y="246" class="eq-text">x̄ₖ = [xₖ; uₖ₋₁]     vₖ = B̄ₜ,ₖ Δuₖ</text>
+  <text x="218" y="268" class="eq-note">The copy vₖ represents the input's effect in the augmented dynamics.</text>
+  <line x1="218" y1="286" x2="982" y2="286" stroke="#d2d2d7"/>
+  <text x="218" y="313" class="label">2 · Three local consensus relations</text>
+  <text x="218" y="342" class="eq-text">x̄ₖ₊₁ − zₖ₊₁ = 0</text>
+  <text x="218" y="370" class="eq-text">B̄ₜ,ₖ Δuₖ − vₖ = 0</text>
+  <text x="218" y="398" class="eq-text">zₖ₊₁ − Āₜ,ₖ x̄ₖ − vₖ − ēₜ,ₖ = 0</text>
+  <text x="218" y="422" class="eq-note">At consensus these recover the original augmented dynamics.</text>
+  <line x1="218" y1="442" x2="982" y2="442" stroke="#d2d2d7"/>
+  <text x="218" y="469" class="label">3 · Local closed forms, followed by a global check</text>
+  <text x="218" y="499" class="eq-text">Δuₖⁱ⁺¹ = Jₖ(v̂ₖⁱ − β̂ₖⁱ)     x̄ₖ₊₁ⁱ⁺¹ = Hₖ hₖ</text>
+  <text x="218" y="528" class="eq-text">Jₖ = (WΔu + ρ B̄ₜ,ₖᵀ B̄ₜ,ₖ)⁻¹ B̄ₜ,ₖᵀ</text>
+  <text x="218" y="550" class="eq-note">Hₖ uses the interior operator Hₐ or the distinct terminal operator Hₐₙ.</text>
+  <text x="218" y="579" class="eq-text">θ ← θ + (x̄ − z)      β ← β + (B̄Δu − v)      λ ← λ + (z − Āx̄ − v − ē)</text>
+  <text x="218" y="608" class="eq-note">All stage updates finish; residual reduction and Nesterov form the next frozen iterate.</text>
+  <g class="control" role="button" tabindex="0" aria-label="Close equations" onclick="toggleEquations()" onkeydown="keyActivate(event,'equations')"><rect x="878" y="169" width="104" height="32" rx="5"/><text x="930" y="190">Close</text></g>
+</g>
+<script><![CDATA[
+  const svg = document.documentElement;
+  let mode = 'pimpc', phase = 0, playing = true, device = 'gpu', cores = 4, iteration = 0;
+  const phaseNames = ['Frozen iterate','Primal updates','Project and copy','Dual updates','Global check'];
+  const descriptions = [
+    ['Frozen iterate', 'Every stage reads the same previous', 'or Nesterov-extrapolated iterate.', 'No new stage update is needed yet.'],
+    ['1 · Primal updates', 'Each stage computes Δuₖ and x̄ₖ₊₁', 'from cached local operators and', 'frozen adjacent iterate columns.'],
+    ['2 · Project and copy', 'Project zₖ₊₁ onto the joint augmented', 'state-input set X̄; update vₖ.', 'This phase reads new primal results.'],
+    ['3 · Dual updates', 'θ, β and λ accumulate violations', 'of state copy, input effect and', 'split dynamics, stage by stage.'],
+    ['4 · Global check', 'Reduce the horizon residuals.', 'Stop if converged; otherwise use', 'Nesterov extrapolation or restart.']
+  ];
+  function keyActivate(event, action) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (action === 'play') togglePlay(); else if (action === 'equations') toggleEquations(); else if (action === 'cpu' || action === 'gpu') setDevice(action); else if (action.startsWith('cores')) setCores(Number(action.slice(5))); else setMode(action); } }
+  function setMode(value) { mode = value; phase = 0; const standard = value === 'standard'; document.getElementById('phase-slider').max = standard ? 3 : 4; document.getElementById('pimpc-view').classList.toggle('hidden', standard); document.getElementById('standard-view').classList.toggle('hidden', !standard); document.getElementById('global-phase').classList.toggle('hidden', standard); document.getElementById('explanation-panel').classList.toggle('hidden', standard); document.getElementById('standard-side').classList.toggle('hidden', !standard); document.getElementById('residual-panel').classList.toggle('hidden', standard); document.getElementById('cpu-button').classList.toggle('hidden', standard); document.getElementById('gpu-button').classList.toggle('hidden', standard); document.getElementById('core-controls').classList.toggle('hidden', standard || device !== 'cpu'); document.getElementById('pimpc-button').classList.toggle('on', !standard); document.getElementById('standard-button').classList.toggle('on', standard); render(); }
+  function setDevice(value) { device = value; document.getElementById('gpu-layout').classList.toggle('hidden', value !== 'gpu'); document.getElementById('cpu-layout').classList.toggle('hidden', value !== 'cpu'); document.getElementById('core-controls').classList.toggle('hidden', value !== 'cpu' || mode !== 'pimpc'); document.getElementById('gpu-button').classList.toggle('on', value === 'gpu'); document.getElementById('cpu-button').classList.toggle('on', value === 'cpu'); document.getElementById('device-heading').textContent = value === 'gpu' ? 'GPU WORK ALLOCATION' : 'CPU WORK ALLOCATION'; document.getElementById('device-line-1').textContent = value === 'gpu' ? 'A kernel processes many stage columns.' : 'Available cores process stage columns.'; document.getElementById('device-line-2').textContent = value === 'gpu' ? 'Tiles show possible concurrent work.' : 'Extra stages wait for the next batch.'; }
+  function setCores(value) { cores = value; document.querySelectorAll('[data-cores]').forEach(node => node.classList.toggle('on', Number(node.getAttribute('data-cores')) === value)); document.getElementById('cpu-schedule-label').textContent = `Illustrative ${value}-core schedule${value === 8 ? ' · first four shown' : ''}`; const labels = document.querySelectorAll('#cpu-layout .res-label'); labels.forEach((node, index) => { node.textContent = index < value ? `core ${index + 1} · k${index}` : `queued · k${index}`; }); }
+  function setPhase(value) { phase = value; render(); }
+  function setIteration(value) { iteration = value; document.getElementById('iteration-slider').value = value; document.getElementById('iteration-value').textContent = `${value} / 25`; const bases = [340, 330, 350], rates = [0.145, 0.12, 0.105], ids = ['res-state','res-input','res-dynamics']; ids.forEach((id, index) => document.getElementById(id).setAttribute('width', Math.max(7, Math.round(bases[index] * Math.exp(-rates[index] * value))))); }
+  function togglePlay() { playing = !playing; document.getElementById('play-label').textContent = playing ? 'Pause' : 'Play'; document.getElementById('play-button').setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation'); }
+  function toggleEquations() { const open = document.getElementById('equations').classList.toggle('open'); document.getElementById('equations-label').textContent = open ? 'Hide equations' : 'Show equations'; document.getElementById('equations-button').setAttribute('aria-label', open ? 'Hide equations' : 'Show equations'); }
+  function render() { document.getElementById('phase-slider').value = phase; document.getElementById('phase-value').textContent = `${phase + 1} / ${mode === 'pimpc' ? 5 : 4}`; svg.setAttribute('aria-label', `${mode === 'pimpc' ? 'πMPC: ' + phaseNames[phase] : 'Riccati ADMM: backward sweep step ' + (phase + 1)}`); document.querySelectorAll('[data-phase]').forEach(node => { const step = Number(node.getAttribute('data-phase')); node.classList.toggle('active', step === phase); node.classList.toggle('done', step < phase); node.classList.toggle('dim', step > phase); }); document.querySelectorAll('#riccati-chain rect').forEach((node, index) => node.classList.toggle('standard-active', index === phase)); const lines = descriptions[phase]; ['phase-heading','phase-line-1','phase-line-2','phase-line-3'].forEach((id, index) => document.getElementById(id).textContent = lines[index]); document.querySelectorAll('#gpu-layout .tile').forEach((node, index) => node.classList.toggle('on', index % 5 === phase || phase === 4)); }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = false; document.getElementById('play-label').textContent = 'Play'; document.getElementById('play-button').setAttribute('aria-label','Play animation'); }
+  setInterval(() => { if (playing && !document.getElementById('equations').classList.contains('open')) { const next = (phase + 1) % (mode === 'pimpc' ? 5 : 4); if (next === 0 && mode === 'pimpc') setIteration((iteration + 1) % 26); setPhase(next); } }, 1700);
+  setDevice('gpu'); setCores(4); setIteration(0);
+  render();
+]]></script>
+</svg>

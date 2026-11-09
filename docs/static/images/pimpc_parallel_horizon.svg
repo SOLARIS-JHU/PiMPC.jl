@@ -1,0 +1,566 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1387" height="712" viewBox="0 0 1387 712" role="img">
+<title>πMPC vs Standard ADMM — horizon decomposition</title>
+<defs>
+  <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#10264d" flood-opacity="0.09"/></filter>
+  <marker id="aB" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="#2676d8"/></marker>
+  <marker id="aT" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="#0f9d8a"/></marker>
+  <marker id="aC" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="#e85d5d"/></marker>
+  <marker id="aG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="#5d6b82"/></marker>
+<style><![CDATA[
+
+text{font-family:Inter,Segoe UI,Arial,sans-serif;fill:#10264d}
+.TTL{font-size:24px;font-weight:800;text-anchor:middle}
+.SUB{font-size:13px;fill:#5d6b82;text-anchor:middle}
+.CLB{font-size:12px;font-weight:800;fill:#5d6b82;letter-spacing:.04em}
+.btn rect{fill:white;stroke:#cbd5e1;stroke-width:1.4}
+.btn text{font-size:13px;font-weight:700;text-anchor:middle;pointer-events:none}
+.btn{cursor:pointer}
+.btn.on rect{fill:#10264d;stroke:#10264d}
+.btn.on text{fill:white}
+.wshell{fill:white;stroke:#cbd5e1;stroke-width:1.3;filter:url(#sh)}
+.whead{fill:#eeeaff;stroke:#6d4aff;stroke-width:1.3}
+.wtitle{font-size:14px;font-weight:800;text-anchor:middle}
+.pchip{fill:#eeeaff;stroke:#6d4aff;stroke-width:1}
+.cchip{fill:#e3f7f3;stroke:#0f9d8a;stroke-width:1}
+.dchip{fill:#fff4df;stroke:#ef9b20;stroke-width:1}
+.ochip{fill:#f0fdf4;stroke:#16a34a;stroke-width:1}
+.clbl{font-size:10px;font-weight:800;text-anchor:middle;fill:#5d6b82}
+.ceq{font-size:12px;font-weight:700;text-anchor:middle}
+.csub{font-size:10px;text-anchor:middle;fill:#5d6b82}
+.worker.inactive{opacity:.18}
+.worker.active .wshell{stroke:#6d4aff;stroke-width:3}
+.worker.done .wshell{stroke:#0f9d8a;stroke-width:2}
+.worker.alldone .wshell{stroke:#0f9d8a;stroke-width:2;fill:#f0fdf4}
+.snap-a{stroke:#2676d8;stroke-width:1.6;fill:none}
+.nb-a{stroke:#2676d8;stroke-width:1;stroke-dasharray:4 3;fill:none;opacity:.55}
+.barr-a{stroke:#0f9d8a;stroke-width:1.6;fill:none}
+#snapBand{fill:#e7f1ff;stroke:#2676d8;stroke-width:1.3}
+#barrBand{fill:#e3f7f3;stroke:#0f9d8a;stroke-width:1.3}
+.bttl{font-size:13px;font-weight:800;text-anchor:middle}
+.bnote{font-size:11px;fill:#5d6b82;text-anchor:middle}
+.std-panel{fill:#fff7f5;stroke:#e85d5d;stroke-width:1.5;filter:url(#sh)}
+.std-ttl{font-size:17px;font-weight:800;text-anchor:middle;fill:#b91c1c}
+.std-sub{font-size:12px;fill:#5d6b82;text-anchor:middle}
+.rbox{fill:white;stroke:#e85d5d;stroke-width:1.5}
+.rbox-done{fill:#ffedec;stroke:#e85d5d;stroke-width:1.5}
+.rbox-active{fill:#e85d5d;stroke:#c01c1c;stroke-width:2.5}
+.rbox-wait{fill:white;stroke:#cbd5e1;stroke-width:1.2;opacity:.4}
+.rtxt{font-size:14px;font-weight:700;text-anchor:middle}
+.rtxt-active{font-size:14px;font-weight:700;text-anchor:middle;fill:white}
+.rpk{font-size:11px;font-weight:600;text-anchor:middle;fill:#b91c1c}
+.rpk-active{font-size:11px;font-weight:600;text-anchor:middle;fill:white}
+.dep-arr{stroke:#e85d5d;stroke-width:2;fill:none}
+.serial-lbl{font-size:13px;font-weight:700;fill:#b91c1c;text-anchor:middle}
+.pbox{fill:#e3f7f3;stroke:#0f9d8a;stroke-width:1.3}
+.ptxt{font-size:13px;font-weight:700;text-anchor:middle;fill:#0f9d8a}
+.pttl{font-size:13px;font-weight:700;fill:#065f46;text-anchor:middle}
+.rlbl{font-size:12px;font-weight:700}
+.rbg{fill:#e5eaf1}
+.rfill{transition:width .22s ease}
+.rval{font-size:11px;fill:#5d6b82}
+.rdis{font-size:10px;fill:#9ca3af;text-anchor:middle;font-style:italic}
+/* FIX: status text right-aligned, not middle */
+.stxt{font-size:14px;font-weight:800;text-anchor:end;fill:#10264d}
+.snote{font-size:12px;fill:#5d6b82;text-anchor:end}
+#eqPanel{opacity:0;pointer-events:none;transition:opacity .18s}
+#eqPanel.visible{opacity:1;pointer-events:auto}
+.epanel{fill:#fff;stroke:#6d4aff;stroke-width:1.7;filter:url(#sh)}
+.ettl{font-size:14px;font-weight:800}
+.eline{font-size:13px;font-family:Cambria Math,STIX Two Math,serif}
+.enote{font-size:11px;fill:#5d6b82}
+#tip{display:none;pointer-events:none}
+.tbg{fill:#10264d;opacity:.93}
+.ttxt{fill:white;font-size:12px}
+.lgtxt{font-size:11px;font-weight:700}
+
+]]></style>
+</defs>
+<rect width="1387" height="712" fill="#f8fafc"/>
+<text x="693" y="36" class="TTL">Standard ADMM vs πMPC — horizon decomposition (N=8)</text>
+<text x="693" y="56" class="SUB">Switch solver to compare serial Riccati chain with parallel independent workers. Select CPU cores to see multi-core πMPC parallelism.</text>
+<g id="legendGrp">
+<rect x="60" y="72" width="11" height="11" rx="2" fill="#eeeaff" stroke="#6d4aff" stroke-width="1.1"/>
+<text x="75" y="82" class="lgtxt" fill="#6d4aff">Step 1 — primal</text>
+<rect x="265" y="72" width="11" height="11" rx="2" fill="#e3f7f3" stroke="#0f9d8a" stroke-width="1.1"/>
+<text x="280" y="82" class="lgtxt" fill="#0f9d8a">Step 2 — copy/project</text>
+<rect x="470" y="72" width="11" height="11" rx="2" fill="#fff4df" stroke="#ef9b20" stroke-width="1.1"/>
+<text x="485" y="82" class="lgtxt" fill="#ef9b20">Step 3 — dual</text>
+<rect x="675" y="72" width="11" height="11" rx="2" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.1"/>
+<text x="690" y="82" class="lgtxt" fill="#16a34a">7 outputs, column k only</text>
+</g>
+<g id="ctrl" transform="translate(60 92)">
+<text x="0" y="13" class="CLB">ANIMATION</text>
+<g id="playBtn" class="btn on" onclick="togglePlay()"><rect width="82" height="30" rx="6" transform="translate(0 18)"/><text x="41" y="38">Pause</text></g>
+<text x="100" y="13" class="CLB">SOLVER</text>
+<g id="stdBtn" class="btn" onclick="setMode('standard')"><rect width="120" height="30" rx="6" transform="translate(100 18)"/><text x="160" y="38">Standard ADMM</text></g>
+<g id="pimpcBtn" class="btn on" onclick="setMode('pimpc')"><rect width="74" height="30" rx="6" transform="translate(226 18)"/><text x="263" y="38">πMPC</text></g>
+<text x="316" y="13" class="CLB" id="devLbl">πMPC DEVICE</text>
+<g id="cpuBtn" class="btn" onclick="setDevice('cpu')"><rect width="60" height="30" rx="6" transform="translate(316 18)"/><text x="346" y="38">CPU</text></g>
+<g id="gpuBtn" class="btn on" onclick="setDevice('gpu')"><rect width="60" height="30" rx="6" transform="translate(382 18)"/><text x="412" y="38">GPU</text></g>
+<text x="460" y="13" class="CLB" id="coresLbl">CPU CORES</text>
+<g id="c1Btn" class="btn" onclick="setCores(1)"><rect width="40" height="30" rx="6" transform="translate(460 18)"/><text x="480" y="38">1</text></g>
+<g id="c2Btn" class="btn" onclick="setCores(2)"><rect width="40" height="30" rx="6" transform="translate(506 18)"/><text x="526" y="38">2</text></g>
+<g id="c4Btn" class="btn" onclick="setCores(4)"><rect width="40" height="30" rx="6" transform="translate(552 18)"/><text x="572" y="38">4</text></g>
+<g id="c8Btn" class="btn on" onclick="setCores(8)"><rect width="40" height="30" rx="6" transform="translate(598 18)"/><text x="618" y="38">8</text></g>
+<text x="660" y="13" class="CLB" id="iterLbl">ADMM ITERATION i</text>
+<foreignObject x="660" y="15" width="290" height="32"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;gap:8px;height:28px;font:12px Inter,Arial;color:#10264d"><input id="iterSlider" type="range" min="0" max="26" value="0" step="1" oninput="setIter(+this.value)" style="width:228px;accent-color:#6d4aff"/><b id="iterVal" style="min-width:18px">0</b></div></foreignObject>
+<g id="eqBtn" class="btn" onclick="toggleEq()"><rect width="148" height="30" rx="6" transform="translate(968 18)"/><text x="1042" y="38">Show equations</text></g>
+</g>
+<g id="stdFlow" style="display:none">
+<rect x="52" y="150" width="1279" height="380" rx="12" class="std-panel"/>
+<text x="693" y="178" class="std-ttl">Standard ADMM — two blocks per iteration</text>
+<text x="693" y="200" class="std-sub" font-weight="700" fill="#b91c1c">Block 1 (SERIAL) — Riccati backward sweep: k=N−1 first, k=0 last</text>
+<rect id="rbox7" x="72" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt7" x="131" y="236" class="rtxt">k=7</text>
+<text id="rtxtb7" x="131" y="254" class="rpk">P₈→P₇</text>
+<rect id="rbox6" x="226" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt6" x="285" y="236" class="rtxt">k=6</text>
+<text id="rtxtb6" x="285" y="254" class="rpk">P₇→P₆</text>
+<rect id="rbox5" x="381" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt5" x="440" y="236" class="rtxt">k=5</text>
+<text id="rtxtb5" x="440" y="254" class="rpk">P₆→P₅</text>
+<rect id="rbox4" x="536" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt4" x="595" y="236" class="rtxt">k=4</text>
+<text id="rtxtb4" x="595" y="254" class="rpk">P₅→P₄</text>
+<rect id="rbox3" x="691" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt3" x="750" y="236" class="rtxt">k=3</text>
+<text id="rtxtb3" x="750" y="254" class="rpk">P₄→P₃</text>
+<rect id="rbox2" x="846" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt2" x="905" y="236" class="rtxt">k=2</text>
+<text id="rtxtb2" x="905" y="254" class="rpk">P₃→P₂</text>
+<rect id="rbox1" x="1001" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt1" x="1060" y="236" class="rtxt">k=1</text>
+<text id="rtxtb1" x="1060" y="254" class="rpk">P₂→P₁</text>
+<rect id="rbox0" x="1156" y="214" width="118" height="56" rx="8" class="rbox"/>
+<text id="rtxt0" x="1215" y="236" class="rtxt">k=0</text>
+<text id="rtxtb0" x="1215" y="254" class="rpk">P₁→P₀</text>
+<path d="M 192 242 L 224 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 346 242 L 379 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 501 242 L 534 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 656 242 L 689 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 811 242 L 844 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 966 242 L 999 242" class="dep-arr" marker-end="url(#aC)"/>
+<path d="M 1121 242 L 1154 242" class="dep-arr" marker-end="url(#aC)"/>
+<text x="693" y="288" class="serial-lbl">Each stage waits for k+1 to finish — serial critical path of length N</text>
+<text x="693" y="312" class="pttl">Block 2 (PARALLEL) — project each z_k and v_k independently</text>
+<rect x="72" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="127" y="346" class="ptxt">z₁, v₀</text>
+<text x="127" y="364" class="ptxt" font-size="12">k=0</text>
+<rect x="226" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="281" y="346" class="ptxt">z₂, v₁</text>
+<text x="281" y="364" class="ptxt" font-size="12">k=1</text>
+<rect x="381" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="436" y="346" class="ptxt">z₃, v₂</text>
+<text x="436" y="364" class="ptxt" font-size="12">k=2</text>
+<rect x="536" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="591" y="346" class="ptxt">z₄, v₃</text>
+<text x="591" y="364" class="ptxt" font-size="12">k=3</text>
+<rect x="691" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="746" y="346" class="ptxt">z₅, v₄</text>
+<text x="746" y="364" class="ptxt" font-size="12">k=4</text>
+<rect x="846" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="901" y="346" class="ptxt">z₆, v₅</text>
+<text x="901" y="364" class="ptxt" font-size="12">k=5</text>
+<rect x="1001" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="1056" y="346" class="ptxt">z₇, v₆</text>
+<text x="1056" y="364" class="ptxt" font-size="12">k=6</text>
+<rect x="1156" y="326" width="110" height="48" rx="7" class="pbox"/>
+<text x="1211" y="346" class="ptxt">z₈, v₇</text>
+<text x="1211" y="364" class="ptxt" font-size="12">k=7</text>
+<text x="693" y="390" class="std-sub">Parallel projection does NOT fix the serial bottleneck — Block 1 dominates</text>
+</g>
+<g id="pimpcFlow">
+<g id="snapGrp">
+<rect id="snapBand" x="52" y="150" width="1263" height="46" rx="8"/>
+<text x="693" y="167" class="bttl">Frozen previous iterate — extrapolated momentum variables with Nesterov</text>
+<text x="693" y="185" class="bnote">worker k reads adjacent iterate columns k+1 and k+2: ẑ&#x2096;&#x208A;&#x2081;, ẑ&#x2096;&#x208A;&#x2082;, v̂&#x2096;, v̂&#x2096;&#x208A;&#x2081;, θ̂&#x2096;, β̂&#x2096;, λ̂&#x2096;, λ̂&#x2096;&#x208A;&#x2081; — no live i+1 data</text>
+<path class="snap-a" d="M 134 196 L 134 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 291 196 L 291 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 448 196 L 448 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 605 196 L 605 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 762 196 L 762 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 919 196 L 919 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 1076 196 L 1076 216" marker-end="url(#aB)"/>
+<path class="snap-a" d="M 1233 196 L 1233 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 291 194 C 291 206,152 206,152 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 448 194 C 448 206,309 206,309 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 605 194 C 605 206,466 206,466 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 762 194 C 762 206,623 206,623 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 919 194 C 919 206,780 206,780 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 1076 194 C 1076 206,937 206,937 216" marker-end="url(#aB)"/>
+<path class="nb-a" d="M 1233 194 C 1233 206,1094 206,1094 216" marker-end="url(#aB)"/>
+</g>
+<g id="w0" class="worker" data-k="0" data-tip="k=0: reads ẑ₁,v̂₀,v̂₁,θ̂₀,β̂₀,λ̂₀,λ̂₁ (frozen). Writes Δu₀,x̄₁,z₁,v₀,θ₀,β₀,λ₀ — column 0 only.">
+<rect class="wshell" x="60" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="60" y="220" width="148" height="38" rx="9"/>
+<text x="134" y="246" class="wtitle">k = 0</text>
+<rect class="pchip" x="69" y="266" width="130" height="60" rx="6"/>
+<text x="134" y="278" class="clbl">① primal</text>
+<text x="134" y="294" class="ceq" fill="#6d4aff">Δu₀=J₀(v̂₀−β̂₀)</text>
+<text x="134" y="310" class="ceq" fill="#6d4aff">x̄₁=H₀·h₀</text>
+<text x="134" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="69" y="334" width="130" height="48" rx="6"/>
+<text x="134" y="346" class="clbl">② copy / project</text>
+<text x="134" y="363" class="ceq" fill="#0f9d8a">z₁ = ProjX̄(·)</text>
+<text x="134" y="378" class="csub">v₀ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="69" y="390" width="130" height="38" rx="6"/>
+<text x="134" y="402" class="clbl">③ dual update</text>
+<text x="134" y="418" class="ceq" fill="#ef9b20">θ₀  β₀  λ₀</text>
+<rect class="ochip" x="69" y="436" width="130" height="34" rx="6"/>
+<text x="134" y="448" class="clbl" fill="#15803d">outputs → col 0 only</text>
+<text x="134" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₀ x̄₁ z₁ v₀ θ₀ β₀ λ₀</text>
+</g>
+<g id="w1" class="worker" data-k="1" data-tip="k=1: reads ẑ₂,v̂₁,v̂₂,θ̂₁,β̂₁,λ̂₁,λ̂₂ (frozen). Writes Δu₁,x̄₂,z₂,v₁,θ₁,β₁,λ₁ — column 1 only.">
+<rect class="wshell" x="217" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="217" y="220" width="148" height="38" rx="9"/>
+<text x="291" y="246" class="wtitle">k = 1</text>
+<rect class="pchip" x="226" y="266" width="130" height="60" rx="6"/>
+<text x="291" y="278" class="clbl">① primal</text>
+<text x="291" y="294" class="ceq" fill="#6d4aff">Δu₁=J₁(v̂₁−β̂₁)</text>
+<text x="291" y="310" class="ceq" fill="#6d4aff">x̄₂=H₁·h₁</text>
+<text x="291" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="226" y="334" width="130" height="48" rx="6"/>
+<text x="291" y="346" class="clbl">② copy / project</text>
+<text x="291" y="363" class="ceq" fill="#0f9d8a">z₂ = ProjX̄(·)</text>
+<text x="291" y="378" class="csub">v₁ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="226" y="390" width="130" height="38" rx="6"/>
+<text x="291" y="402" class="clbl">③ dual update</text>
+<text x="291" y="418" class="ceq" fill="#ef9b20">θ₁  β₁  λ₁</text>
+<rect class="ochip" x="226" y="436" width="130" height="34" rx="6"/>
+<text x="291" y="448" class="clbl" fill="#15803d">outputs → col 1 only</text>
+<text x="291" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₁ x̄₂ z₂ v₁ θ₁ β₁ λ₁</text>
+</g>
+<g id="w2" class="worker" data-k="2" data-tip="k=2: reads ẑ₃,v̂₂,v̂₃,θ̂₂,β̂₂,λ̂₂,λ̂₃ (frozen). Writes Δu₂,x̄₃,z₃,v₂,θ₂,β₂,λ₂ — column 2 only.">
+<rect class="wshell" x="374" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="374" y="220" width="148" height="38" rx="9"/>
+<text x="448" y="246" class="wtitle">k = 2</text>
+<rect class="pchip" x="383" y="266" width="130" height="60" rx="6"/>
+<text x="448" y="278" class="clbl">① primal</text>
+<text x="448" y="294" class="ceq" fill="#6d4aff">Δu₂=J₂(v̂₂−β̂₂)</text>
+<text x="448" y="310" class="ceq" fill="#6d4aff">x̄₃=H₂·h₂</text>
+<text x="448" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="383" y="334" width="130" height="48" rx="6"/>
+<text x="448" y="346" class="clbl">② copy / project</text>
+<text x="448" y="363" class="ceq" fill="#0f9d8a">z₃ = ProjX̄(·)</text>
+<text x="448" y="378" class="csub">v₂ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="383" y="390" width="130" height="38" rx="6"/>
+<text x="448" y="402" class="clbl">③ dual update</text>
+<text x="448" y="418" class="ceq" fill="#ef9b20">θ₂  β₂  λ₂</text>
+<rect class="ochip" x="383" y="436" width="130" height="34" rx="6"/>
+<text x="448" y="448" class="clbl" fill="#15803d">outputs → col 2 only</text>
+<text x="448" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₂ x̄₃ z₃ v₂ θ₂ β₂ λ₂</text>
+</g>
+<g id="w3" class="worker" data-k="3" data-tip="k=3: reads ẑ₄,v̂₃,v̂₄,θ̂₃,β̂₃,λ̂₃,λ̂₄ (frozen). Writes Δu₃,x̄₄,z₄,v₃,θ₃,β₃,λ₃ — column 3 only.">
+<rect class="wshell" x="531" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="531" y="220" width="148" height="38" rx="9"/>
+<text x="605" y="246" class="wtitle">k = 3</text>
+<rect class="pchip" x="540" y="266" width="130" height="60" rx="6"/>
+<text x="605" y="278" class="clbl">① primal</text>
+<text x="605" y="294" class="ceq" fill="#6d4aff">Δu₃=J₃(v̂₃−β̂₃)</text>
+<text x="605" y="310" class="ceq" fill="#6d4aff">x̄₄=H₃·h₃</text>
+<text x="605" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="540" y="334" width="130" height="48" rx="6"/>
+<text x="605" y="346" class="clbl">② copy / project</text>
+<text x="605" y="363" class="ceq" fill="#0f9d8a">z₄ = ProjX̄(·)</text>
+<text x="605" y="378" class="csub">v₃ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="540" y="390" width="130" height="38" rx="6"/>
+<text x="605" y="402" class="clbl">③ dual update</text>
+<text x="605" y="418" class="ceq" fill="#ef9b20">θ₃  β₃  λ₃</text>
+<rect class="ochip" x="540" y="436" width="130" height="34" rx="6"/>
+<text x="605" y="448" class="clbl" fill="#15803d">outputs → col 3 only</text>
+<text x="605" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₃ x̄₄ z₄ v₃ θ₃ β₃ λ₃</text>
+</g>
+<g id="w4" class="worker" data-k="4" data-tip="k=4: reads ẑ₅,v̂₄,v̂₅,θ̂₄,β̂₄,λ̂₄,λ̂₅ (frozen). Writes Δu₄,x̄₅,z₅,v₄,θ₄,β₄,λ₄ — column 4 only.">
+<rect class="wshell" x="688" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="688" y="220" width="148" height="38" rx="9"/>
+<text x="762" y="246" class="wtitle">k = 4</text>
+<rect class="pchip" x="697" y="266" width="130" height="60" rx="6"/>
+<text x="762" y="278" class="clbl">① primal</text>
+<text x="762" y="294" class="ceq" fill="#6d4aff">Δu₄=J₄(v̂₄−β̂₄)</text>
+<text x="762" y="310" class="ceq" fill="#6d4aff">x̄₅=H₄·h₄</text>
+<text x="762" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="697" y="334" width="130" height="48" rx="6"/>
+<text x="762" y="346" class="clbl">② copy / project</text>
+<text x="762" y="363" class="ceq" fill="#0f9d8a">z₅ = ProjX̄(·)</text>
+<text x="762" y="378" class="csub">v₄ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="697" y="390" width="130" height="38" rx="6"/>
+<text x="762" y="402" class="clbl">③ dual update</text>
+<text x="762" y="418" class="ceq" fill="#ef9b20">θ₄  β₄  λ₄</text>
+<rect class="ochip" x="697" y="436" width="130" height="34" rx="6"/>
+<text x="762" y="448" class="clbl" fill="#15803d">outputs → col 4 only</text>
+<text x="762" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₄ x̄₅ z₅ v₄ θ₄ β₄ λ₄</text>
+</g>
+<g id="w5" class="worker" data-k="5" data-tip="k=5: reads ẑ₆,v̂₅,v̂₆,θ̂₅,β̂₅,λ̂₅,λ̂₆ (frozen). Writes Δu₅,x̄₆,z₆,v₅,θ₅,β₅,λ₅ — column 5 only.">
+<rect class="wshell" x="845" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="845" y="220" width="148" height="38" rx="9"/>
+<text x="919" y="246" class="wtitle">k = 5</text>
+<rect class="pchip" x="854" y="266" width="130" height="60" rx="6"/>
+<text x="919" y="278" class="clbl">① primal</text>
+<text x="919" y="294" class="ceq" fill="#6d4aff">Δu₅=J₅(v̂₅−β̂₅)</text>
+<text x="919" y="310" class="ceq" fill="#6d4aff">x̄₆=H₅·h₅</text>
+<text x="919" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="854" y="334" width="130" height="48" rx="6"/>
+<text x="919" y="346" class="clbl">② copy / project</text>
+<text x="919" y="363" class="ceq" fill="#0f9d8a">z₆ = ProjX̄(·)</text>
+<text x="919" y="378" class="csub">v₅ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="854" y="390" width="130" height="38" rx="6"/>
+<text x="919" y="402" class="clbl">③ dual update</text>
+<text x="919" y="418" class="ceq" fill="#ef9b20">θ₅  β₅  λ₅</text>
+<rect class="ochip" x="854" y="436" width="130" height="34" rx="6"/>
+<text x="919" y="448" class="clbl" fill="#15803d">outputs → col 5 only</text>
+<text x="919" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₅ x̄₆ z₆ v₅ θ₅ β₅ λ₅</text>
+</g>
+<g id="w6" class="worker" data-k="6" data-tip="k=6: reads ẑ₇,v̂₆,v̂₇,θ̂₆,β̂₆,λ̂₆,λ̂₇ (frozen). Writes Δu₆,x̄₇,z₇,v₆,θ₆,β₆,λ₆ — column 6 only.">
+<rect class="wshell" x="1002" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="1002" y="220" width="148" height="38" rx="9"/>
+<text x="1076" y="246" class="wtitle">k = 6</text>
+<rect class="pchip" x="1011" y="266" width="130" height="60" rx="6"/>
+<text x="1076" y="278" class="clbl">① primal</text>
+<text x="1076" y="294" class="ceq" fill="#6d4aff">Δu₆=J₆(v̂₆−β̂₆)</text>
+<text x="1076" y="310" class="ceq" fill="#6d4aff">x̄₇=H₆·h₆</text>
+<text x="1076" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="1011" y="334" width="130" height="48" rx="6"/>
+<text x="1076" y="346" class="clbl">② copy / project</text>
+<text x="1076" y="363" class="ceq" fill="#0f9d8a">z₇ = ProjX̄(·)</text>
+<text x="1076" y="378" class="csub">v₆ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="1011" y="390" width="130" height="38" rx="6"/>
+<text x="1076" y="402" class="clbl">③ dual update</text>
+<text x="1076" y="418" class="ceq" fill="#ef9b20">θ₆  β₆  λ₆</text>
+<rect class="ochip" x="1011" y="436" width="130" height="34" rx="6"/>
+<text x="1076" y="448" class="clbl" fill="#15803d">outputs → col 6 only</text>
+<text x="1076" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₆ x̄₇ z₇ v₆ θ₆ β₆ λ₆</text>
+</g>
+<g id="w7" class="worker" data-k="7" data-tip="k=7: reads ẑ₈,v̂₇,v̂₈,θ̂₇,β̂₇,λ̂₇,λ̂₈ (frozen). Writes Δu₇,x̄₈,z₈,v₇,θ₇,β₇,λ₇ — column 7 only.">
+<rect class="wshell" x="1159" y="220" width="148" height="252" rx="9"/>
+<rect class="whead"  x="1159" y="220" width="148" height="38" rx="9"/>
+<text x="1233" y="246" class="wtitle">k = 7</text>
+<rect class="pchip" x="1168" y="266" width="130" height="60" rx="6"/>
+<text x="1233" y="278" class="clbl">① primal</text>
+<text x="1233" y="294" class="ceq" fill="#6d4aff">Δu₇=J₇(v̂₇−β̂₇)</text>
+<text x="1233" y="310" class="ceq" fill="#6d4aff">x̄₈=H₇·h₇</text>
+<text x="1233" y="323" class="csub">closed form, no coupling</text>
+<rect class="cchip" x="1168" y="334" width="130" height="48" rx="6"/>
+<text x="1233" y="346" class="clbl">② copy / project</text>
+<text x="1233" y="363" class="ceq" fill="#0f9d8a">z₈ = ProjX̄(·)</text>
+<text x="1233" y="378" class="csub">v₇ = ½(z+γ) · box clamp</text>
+<rect class="dchip" x="1168" y="390" width="130" height="38" rx="6"/>
+<text x="1233" y="402" class="clbl">③ dual update</text>
+<text x="1233" y="418" class="ceq" fill="#ef9b20">θ₇  β₇  λ₇</text>
+<rect class="ochip" x="1168" y="436" width="130" height="34" rx="6"/>
+<text x="1233" y="448" class="clbl" fill="#15803d">outputs → col 7 only</text>
+<text x="1233" y="463" class="ceq" fill="#16a34a" font-size="10">Δu₇ x̄₈ z₈ v₇ θ₇ β₇ λ₇</text>
+</g>
+<g id="barrGrp">
+<path class="barr-a" d="M 134 472 L 134 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 291 472 L 291 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 448 472 L 448 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 605 472 L 605 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 762 472 L 762 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 919 472 L 919 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 1076 472 L 1076 489" marker-end="url(#aT)"/>
+<path class="barr-a" d="M 1233 472 L 1233 489" marker-end="url(#aT)"/>
+<rect id="barrBand" x="52" y="489" width="1263" height="44" rx="8"/>
+<text x="693" y="506" class="bttl">Synchronisation barrier (πMPC only)</text>
+<text x="693" y="524" class="bnote">All N workers finish → Nesterov forms ẑ,v̂,θ̂,β̂,λ̂ → frozen for iteration i+1</text>
+</g>
+</g>
+<g id="resGrp" transform="translate(60 556)">
+<text x="0" y="0" class="CLB">CONSENSUS RESIDUALS  (πMPC only)</text>
+<text x="600" y="0" class="rdis">* illustrative relative rates — actual rates depend on ρ and problem data</text>
+<text x="0" y="31" class="rlbl">‖x̄ₖ₊₁ − zₖ₊₁‖   (dual θ)</text>
+<rect x="320" y="18" width="210" height="15" rx="7" class="rbg"/>
+<rect id="resX" x="320" y="18" width="210" height="15" rx="7" class="rfill" fill="#6d4aff"/>
+<text id="resXVal" x="537" y="31" class="rval">—</text>
+<text x="0" y="59" class="rlbl">‖B̄Δuₖ − vₖ‖     (dual β)</text>
+<rect x="320" y="46" width="210" height="15" rx="7" class="rbg"/>
+<rect id="resU" x="320" y="46" width="210" height="15" rx="7" class="rfill" fill="#0f9d8a"/>
+<text id="resUVal" x="537" y="59" class="rval">—</text>
+<text x="0" y="87" class="rlbl">‖zₖ₊₁ − Āx̄ₖ − vₖ − ēₖ‖   (dual λ)</text>
+<rect x="320" y="74" width="210" height="15" rx="7" class="rbg"/>
+<rect id="resD" x="320" y="74" width="210" height="15" rx="7" class="rfill" fill="#ef9b20"/>
+<text id="resDVal" x="537" y="87" class="rval">—</text>
+</g>
+<text id="statusTxt"  x="1357" y="670" class="stxt">πMPC GPU — all 8 workers run simultaneously</text>
+<text id="statusNote" x="1357" y="690" class="snote">No mathematical coupling between stages. O(1) wall-clock per iteration, independent of N.</text>
+<g id="eqPanel" transform="translate(373 130)">
+<rect class="epanel" width="640" height="420" rx="12"/>
+<text x="20" y="34" class="ettl">① The key copy: vₖ = B̄ₖΔuₖ  (not vₖ = uₖ)</text>
+<text x="20" y="62" class="eline">Without: vₖ=uₖ → B̄ₖ stays in dynamics → step k waits for k+1 → Riccati chain</text>
+<text x="20" y="88" class="eline">With πMPC: vₖ=B̄ₖΔuₖ → zₖ₊₁=Āₖx̄ₖ+vₖ+ēₖ → step k reads only frozen values</text>
+<text x="20" y="108" class="enote">Result: Δuₖ subproblem is a pure quadratic → closed form Δuₖ=Jₖ(v̂ₖ−β̂ₖ)</text>
+<line x1="20" y1="126" x2="620" y2="126" stroke="#cbd5e1"/>
+<text x="20" y="152" class="ettl">② Three constraints, one dual each</text>
+<text x="20" y="178" class="eline">x̄ₖ₊₁=zₖ₊₁   ⟹   θₖ ← θₖ+(x̄ₖ₊₁−zₖ₊₁)</text>
+<text x="20" y="204" class="eline">B̄ₖΔuₖ=vₖ    ⟹   βₖ ← βₖ+(B̄ₖΔuₖ−vₖ)</text>
+<text x="20" y="230" class="eline">zₖ₊₁=Āₖx̄ₖ+vₖ+ēₖ  ⟹   λₖ ← λₖ+(zₖ₊₁−Āₖx̄ₖ−vₖ−ēₖ)</text>
+<line x1="20" y1="248" x2="620" y2="248" stroke="#cbd5e1"/>
+<text x="20" y="274" class="ettl">③ At consensus (all three residuals → 0)</text>
+<text x="20" y="300" class="eline">x̄ₖ₊₁=zₖ₊₁, B̄ₖΔuₖ=vₖ, zₖ₊₁=Āₖx̄ₖ+vₖ+ēₖ  →  x̄ₖ₊₁=Āₖx̄ₖ+B̄ₖΔuₖ+ēₖ</text>
+<text x="20" y="320" class="enote">Original MPC dynamics exactly recovered.</text>
+<line x1="20" y1="338" x2="620" y2="338" stroke="#cbd5e1"/>
+<text x="20" y="364" class="ettl">④ CPU multi-core: same algorithm, more hardware parallelism</text>
+<text x="20" y="390" class="eline">Standard ADMM: k waits for k+1 — cannot parallelise regardless of cores</text>
+<text x="20" y="414" class="eline">πMPC CPU (M cores): ceil(N/M) rounds — with M≥N identical to GPU</text>
+</g>
+<g id="tip"><rect class="tbg" width="520" height="40" rx="6"/><text class="ttxt" id="tipTxt" x="10" y="26"></text></g>
+<script><![CDATA[
+
+  var mode='pimpc', device='gpu', cpuCores=8, iter=0, playing=true, eqVis=false;
+  var N=8, RES_W=210;
+  function cpuTicks(){ return Math.ceil(N/cpuCores)+1; }
+  var SLIDER_MAX=3*(N+1)-1;
+  var workers=Array.prototype.slice.call(document.querySelectorAll('.worker'));
+  var slider=document.getElementById('iterSlider');
+  slider.max=SLIDER_MAX;
+
+  function btn(id,on){ document.getElementById(id).classList.toggle('on',on); }
+  function setMode(m){
+    mode=m; btn('stdBtn',m==='standard'); btn('pimpcBtn',m==='pimpc');
+    setIter(0); update();
+  }
+  function setDevice(d){ device=d; btn('cpuBtn',d==='cpu'); btn('gpuBtn',d==='gpu'); update(); }
+  function setCores(m){
+    cpuCores=m;
+    [1,2,4,8].forEach(function(n){ btn('c'+n+'Btn', n===m); });
+    setIter(0); update();
+  }
+  function setIter(v){
+    iter=+v; slider.value=iter;
+    document.getElementById('iterVal').textContent=iter; update();
+  }
+  function togglePlay(){
+    playing=!playing;
+    document.querySelector('#playBtn text').textContent=playing?'Pause':'Play';
+    btn('playBtn',playing);
+  }
+  function toggleEq(){
+    eqVis=!eqVis;
+    document.getElementById('eqPanel').classList.toggle('visible',eqVis);
+    document.querySelector('#eqBtn text').textContent=eqVis?'Hide equations':'Show equations';
+    btn('eqBtn',eqVis);
+  }
+
+  function setRbox(k,cls){
+    var rb=document.getElementById('rbox'+k);
+    var rt=document.getElementById('rtxt'+k);
+    var rtb=document.getElementById('rtxtb'+k);
+    if(!rb) return;
+    rb.className.baseVal=cls;
+    var active=cls==='rbox-active';
+    rt.className.baseVal=active?'rtxt-active':'rtxt';
+    if(rtb) rtb.className.baseVal=active?'rpk-active':'rpk';
+  }
+
+  /* FIX: status text is positioned by SVG attributes (text-anchor:end, x=SVG_W-30).
+     JS only updates textContent — position never changes. */
+  function setStat(line1, line2){
+    document.getElementById('statusTxt').textContent  = line1;
+    document.getElementById('statusNote').textContent = line2;
+  }
+
+  function update(){
+    var std=mode==='standard';
+    document.getElementById('stdFlow').style.display   = std?'block':'none';
+    document.getElementById('pimpcFlow').style.display = std?'none':'block';
+    document.getElementById('legendGrp').style.display = std?'none':'block';
+    document.getElementById('resGrp').style.display    = std?'none':'block';
+
+    ['devLbl','cpuBtn','gpuBtn'].forEach(function(id){
+      document.getElementById(id).style.opacity=std?0.3:1;
+      document.getElementById(id).style.pointerEvents=std?'none':'auto';
+    });
+    var coreActive=!std&&device==='cpu';
+    ['coresLbl','c1Btn','c2Btn','c4Btn','c8Btn'].forEach(function(id){
+      document.getElementById(id).style.opacity=coreActive?1:0.3;
+      document.getElementById(id).style.pointerEvents=coreActive?'auto':'none';
+    });
+
+    if(std){
+      var stage=iter%N;
+      for(var k=0;k<N;k++){
+        var pos=(N-1)-k;
+        if(pos===stage)    setRbox(k,'rbox-active');
+        else if(pos<stage) setRbox(k,'rbox-done');
+        else               setRbox(k,'rbox-wait');
+      }
+      document.getElementById('iterLbl').textContent=
+        'RICCATI STAGE  (sweep '+(Math.floor(iter/N)+1)+')';
+      setStat(
+        'Standard ADMM — Riccati sweep k='+(N-1)+'→k=0  (serial by math, not hardware)',
+        'Even with unlimited CPU cores, k must wait for k+1. The coupling is mathematical, not hardware.'
+      );
+
+    } else if(device==='gpu'){
+      workers.forEach(function(w){
+        w.classList.remove('active','inactive','done','alldone');
+        w.classList.add('active');
+      });
+      document.getElementById('iterLbl').textContent='ADMM ITERATION i';
+      setStat(
+        'πMPC GPU — all '+N+' workers run simultaneously',
+        'No mathematical coupling between stages. O(1) wall-clock per iteration, independent of N.'
+      );
+
+    } else {
+      var TICKS=cpuTicks();
+      var admm_i=Math.floor(iter/TICKS);
+      var sub_t=iter%TICKS;
+      var rounds=Math.ceil(N/cpuCores);
+      var allDone=(sub_t===rounds);
+      workers.forEach(function(w,k){
+        w.classList.remove('active','inactive','done','alldone');
+        if(allDone){ w.classList.add('alldone'); }
+        else {
+          var wr=Math.floor(k/cpuCores);
+          if(wr<sub_t)       w.classList.add('done');
+          else if(wr===sub_t) w.classList.add('active');
+          else                w.classList.add('inactive');
+        }
+      });
+      document.getElementById('iterLbl').textContent = allDone
+        ? 'ADMM ITER '+admm_i+' complete ('+cpuCores+' cores, '+rounds+' round'+(rounds>1?'s':'')+')'
+        : 'ADMM ITER '+admm_i+'  |  Round '+(sub_t+1)+'/'+rounds+'  ('+cpuCores+' core'+(cpuCores>1?'s':'')+')';
+      var active_now=Math.min(cpuCores,N-sub_t*cpuCores);
+      setStat(
+        allDone
+          ? 'πMPC CPU ('+cpuCores+' core'+(cpuCores>1?'s':'')+') — all '+N+' stages done'
+          : 'πMPC CPU ('+cpuCores+' core'+(cpuCores>1?'s':'')+') — '+active_now+' worker'+(active_now>1?'s':'')+' in parallel',
+        cpuCores>=N
+          ? 'With '+cpuCores+' cores ≥ N: all workers run at once — identical to GPU.'
+          : 'No mathematical coupling. With more cores, more stages run simultaneously.'
+      );
+    }
+
+    if(!std){
+      var ai=(device==='cpu')?Math.floor(iter/cpuTicks()):iter;
+      var vX=Math.exp(-ai/6.2), vU=Math.exp(-ai/4.8), vD=Math.exp(-ai/7.5);
+      document.getElementById('resX').setAttribute('width',RES_W*vX);
+      document.getElementById('resU').setAttribute('width',RES_W*vU);
+      document.getElementById('resD').setAttribute('width',RES_W*vD);
+      document.getElementById('resXVal').textContent=vX<0.04?'✓':'↓';
+      document.getElementById('resUVal').textContent=vU<0.04?'✓':'↓';
+      document.getElementById('resDVal').textContent=vD<0.04?'✓':'↓';
+    }
+  }
+
+  setInterval(function(){ if(playing) setIter((iter+1)%(SLIDER_MAX+1)); }, 680);
+
+  var svgEl=document.querySelector('svg');
+  document.querySelectorAll('[data-tip]').forEach(function(el){
+    el.addEventListener('mousemove',function(ev){
+      var pt=svgEl.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+      var sp=pt.matrixTransform(svgEl.getScreenCTM().inverse());
+      var t=document.getElementById('tip'); t.style.display='block';
+      t.setAttribute('transform','translate('+
+        Math.min(sp.x+12,svgEl.viewBox.baseVal.width-530)+','+
+        Math.max(sp.y-48,10)+')');
+      document.getElementById('tipTxt').textContent=el.dataset.tip;
+    });
+    el.addEventListener('mouseleave',function(){
+      document.getElementById('tip').style.display='none';
+    });
+  });
+  update();
+
+]]></script>
+</svg>
