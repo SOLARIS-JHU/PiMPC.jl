@@ -158,7 +158,13 @@
               </div>
               <div class="institution-logos" aria-label="Participating institutions">
                 <a href="https://www.jhu.edu/" target="_blank" rel="noopener" aria-label="Johns Hopkins University">
-                  <img src="static/images/jhu_logo.png" alt="Johns Hopkins University">
+                  <img src="static/images/jhu_wordmark.png" alt="Johns Hopkins University">
+                </a>
+                <a href="https://solaris-jhu.github.io/solaris-website/" target="_blank" rel="noopener" aria-label="SOLARIS">
+                  <img src="static/images/solaris_logo.png" alt="SOLARIS">
+                </a>
+                <a href="https://energyinstitute.jhu.edu/" target="_blank" rel="noopener" aria-label="Ralph O'Connor Sustainable Energy Institute">
+                  <img src="static/images/energy_institute_logo.png" alt="Ralph O'Connor Sustainable Energy Institute">
                 </a>
                 <a href="https://www.tsinghua.edu.cn/en/" target="_blank" rel="noopener" aria-label="Tsinghua University">
                   <img src="static/images/tsinghua_logo.png" alt="Tsinghua University">
@@ -193,6 +199,39 @@
       </div>
     </section>
 
+    <section class="section highlights-section" id="highlights" aria-labelledby="highlights-title">
+      <div class="container is-max-widescreen">
+        <div class="highlights-intro">
+          <span class="method-kicker">At a glance</span>
+          <h2 class="title is-3" id="highlights-title">The advantage is in the horizon.</h2>
+          <p>Direct stage updates make long-horizon MPC practical without assembling a horizon-wide QP at every control step.</p>
+        </div>
+        <div class="highlights-grid">
+          <article class="highlight-item">
+            <strong class="highlight-value">&lt; 0.01 ms</strong>
+            <h3>consistent GPU iteration time</h3>
+            <p>GPU πMPC maintains nearly constant computation time across all tested scales, supporting consistent iteration-level convergence performance.</p>
+          </article>
+          <article class="highlight-item">
+            <strong class="highlight-value">3,000×</strong>
+            <h3>faster iteration than QP-ADMM</h3>
+            <p>Parallel horizon updates let πMPC turn available GPU work into dramatically lower iteration time than QP-ADMM.</p>
+          </article>
+          <article class="highlight-item">
+            <strong class="highlight-value">3.6×</strong>
+            <h3>faster nonlinear MPC solve</h3>
+            <p>Measured over 400 MPC steps with 1,000 iterations each and prediction horizon (N=5000).</p>
+          </article>
+          <article class="highlight-item">
+            <strong class="highlight-value">1.073 s</strong>
+            <h3>QP construction avoided</h3>
+            <p>Median assembly time reported for OSQP on the nonlinear control test. πMPC operates directly on stage matrices.</p>
+          </article>
+        </div>
+        <p class="highlights-source">Reported measurements from <a href="https://arxiv.org/pdf/2601.14414" target="_blank" rel="noopener">Table I and Table II of the πMPC paper</a>; hardware and test conditions are described there.</p>
+      </div>
+    </section>
+
     <section class="section hero-media band-white">
       <div class="container is-max-widescreen">
         <figure class="overview-figure">
@@ -202,39 +241,6 @@
           </video>
           <figcaption>From receding-horizon MPC and explicit QP construction to πMPC's construction-free, parallel-in-horizon ADMM updates.</figcaption>
         </figure>
-      </div>
-    </section>
-
-    <section class="section highlights-section band-white" id="highlights" aria-labelledby="highlights-title">
-      <div class="container is-max-widescreen">
-        <div class="highlights-intro">
-          <span class="method-kicker">At a glance</span>
-          <h2 class="title is-3" id="highlights-title">The advantage is in the horizon.</h2>
-          <p>Direct stage updates make long-horizon MPC practical without assembling a horizon-wide QP at every control step.</p>
-        </div>
-        <div class="highlights-grid">
-          <article class="highlight-item">
-            <strong class="highlight-value">0.62 ms</strong>
-            <h3>per GPU iteration</h3>
-            <p>At horizon (N=500) for the paper's random system with (n=100) states and (m=30) inputs.</p>
-          </article>
-          <article class="highlight-item">
-            <strong class="highlight-value">160×</strong>
-            <h3>lower iteration time</h3>
-            <p>Compared with OSQP's 99.36 ms in the same (N=500), (n=100), (m=30) GPU-scaling benchmark. This compares iteration time, not complete solve time.</p>
-          </article>
-          <article class="highlight-item">
-            <strong class="highlight-value">3.6×</strong>
-            <h3>faster median CSTR solve</h3>
-            <p>πMPC takes 0.526 s per MPC step versus OSQP's 1.891 s at (N=5000) with 1,000 iterations, as reported in Table II.</p>
-          </article>
-          <article class="highlight-item">
-            <strong class="highlight-value">1.073 s</strong>
-            <h3>QP construction avoided</h3>
-            <p>Median assembly time reported for OSQP on that CSTR test. πMPC operates directly on stage matrices.</p>
-          </article>
-        </div>
-        <p class="highlights-source">Reported measurements from <a href="https://arxiv.org/pdf/2601.14414" target="_blank" rel="noopener">Table I and Table II of the πMPC paper</a>; hardware and test conditions are described there.</p>
       </div>
     </section>
 
@@ -644,7 +650,7 @@
   <footer class="footer">
     <div class="container">
       <div class="content has-text-centered">
-        <p>Built with the Academic Project Page Template. Media files are local and ready for GitHub Pages.</p>
+        <p>πMPC: A Parallel-in-horizon and Construction-free NMPC Solver.</p>
       </div>
     </div>
   </footer>
